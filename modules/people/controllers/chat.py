@@ -35,16 +35,9 @@ def chat():
         db.session.add(default_channel)
         db.session.commit()
 
-    if is_mobile():
-        return render_template(
-            "chat/index-mobile.html",
-            channels=channels,
-            ChatMessageState=ChatMessageState,
-            title="Chat"
-        )
     
     return render_template(
-        "chat/index-desktop.html",
+        "chat/index-desktop.html" if not is_mobile() else "chat/index-mobile.html",
         active_page="chat",
         title="Company Chat",
         channels=channels,
@@ -393,6 +386,7 @@ def chat_channel(channel_name):
             "chat/channel-mobile.html",
             channel=channel,
             messages=messages,
+            ChatMessageState=ChatMessageState,
             title=f"#{channel_name}"
         )
         

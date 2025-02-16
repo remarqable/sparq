@@ -123,23 +123,24 @@ window.chatApp = () => ({
                 const errorText = await response.text();
                 throw new Error(errorText || 'Failed to load messages');
             }
-            const html = await response.text();
             
-            this.filteredMessages = html;
-            
-            // Use $nextTick to ensure DOM is updated before scrolling
-            this.$nextTick(() => {
-                if (!beforeId) {  // Only scroll to bottom for new messages
-                    this.scrollToBottom();
-                }
-                this.updatePinCount();
-            });
+            // For mobile view, we need to update the messages container directly
+            const chatMessages = this.$refs.chatMessages;
+            if (chatMessages) {
+                const html = await response.text();
+                chatMessages.innerHTML = html;
+                
+                // Dispatch event to trigger scroll
+                window.dispatchEvent(new CustomEvent('chat-updated'));
+            }
         } catch (error) {
             console.error('Error loading messages:', error);
-            this.filteredMessages = `<div class="text-center p-4 text-danger">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                Error loading messages. Please try again.
-            </div>`;
+            if (this.$refs.chatMessages) {
+                this.$refs.chatMessages.innerHTML = `<div class="text-center p-4 text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error loading messages. Please try again.
+                </div>`;
+            }
         }
     },
 
@@ -224,7 +225,15 @@ window.chatApp = () => ({
             if (!response.ok) throw new Error('Failed to send message');
             
             this.messageContent = '';
-            this.loadChannelMessages(this.currentChannel);
+            await this.loadChannelMessages(this.currentChannel);
+            
+            // Focus back on the input after sending
+            if (this.$refs.messageInput) {
+                this.$refs.messageInput.focus();
+            }
+            
+            // Dispatch event to trigger scroll
+            window.dispatchEvent(new CustomEvent('chat-updated'));
         } catch (error) {
             console.error('Error sending message:', error);
         }

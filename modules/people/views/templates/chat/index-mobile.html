@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{{ url_for('people_bp.static', filename='css/chat.css') }}">
 <style>
     .chat-container {
-        height: calc(100vh - var(--header-height) - var(--footer-height));
+        height: calc(100vh - var(--header-height));
         display: flex;
         flex-direction: column;
         background: var(--surface-ground);
@@ -86,6 +86,57 @@
         text-align: center;
     }
 
+    .message-input-area {
+        padding: 12px;
+        background: white;
+    }
+
+    .message-form {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .message-format-header {
+        padding: 8px;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .message-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 8px 12px;
+        background: #fff;
+    }
+
+    .message-input {
+        flex: 1;
+        border: none;
+        resize: none;
+        padding: 8px 40px 8px 0;
+        max-height: 120px;
+        min-height: 24px;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.5;
+        background: transparent;
+    }
+
+    .message-format-footer {
+        padding: 8px;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
     @media (prefers-color-scheme: dark) {
         .chat-item {
             border-color: rgba(255,255,255,0.1);
@@ -96,18 +147,12 @@
             color: #adb5bd;
         }
     }
-
-    .back-transition {
-        view-transition-name: back;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="mobile-header">
-    <a href="{{ url_for('people_bp.functions') }}" 
-       class="back-button"
-       onclick="document.documentElement.classList.add('back-transition')">
+    <a href="{{ url_for('people_bp.functions') }}" class="back-button">
         <i class="fas fa-chevron-left"></i>
     </a>
     <div class="header-title">
@@ -119,7 +164,7 @@
     <div></div>
 </div>
 
-<div class="chat-container" x-data="chatList" x-init="initializeApp">
+<div class="chat-container" x-data="chatApp" x-init="initializeApp">
     <meta name="user-id" content="{{ current_user.id }}">
     <meta name="default-channel" content="{{ default_channel.name }}">
     <meta name="default-channel-description" content="{{ default_channel.description }}">
@@ -142,6 +187,7 @@
         }{% if not loop.last %},{% endif %}
         {% endfor %}
     ]}'>
+    
     <div class="chat-list">
         {% for channel in channels %}
         <a href="{{ url_for('people_bp.chat_channel', channel_name=channel.name) }}" 
@@ -167,91 +213,5 @@
 {% block scripts %}
 <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('chatList', () => ({
-        socket: null,
-        currentUserId: parseInt(document.querySelector('meta[name="user-id"]').content),
-        channelStates: Object.fromEntries([
-            {% for channel in channels %}
-            [{{ channel.id }}, {
-                unreadCount: {{ ChatMessageState.get_unread_count(current_user.id, channel.id) }},
-                name: '{{ channel.name }}'
-            }],
-            {% endfor %}
-        ]),
-
-        initializeApp() {
-            this.loadUnreadCounts();
-            this.initializeSocket();
-        },
-
-        loadUnreadCounts() {
-            try {
-                const storedCounts = JSON.parse(localStorage.getItem('unreadCounts') || '{}');
-                Object.keys(storedCounts).forEach(channelId => {
-                    if (this.channelStates[channelId]) {
-                        this.channelStates[channelId].unreadCount = storedCounts[channelId];
-                    }
-                });
-            } catch (error) {
-                console.error('Error loading unread counts from storage:', error);
-            }
-        },
-
-        initializeSocket() {
-            this.socket = io();
-            
-            this.socket.on('connect', () => {
-                // Join all channels to receive updates
-                Object.keys(this.channelStates).forEach(channelId => {
-                    const channelName = this.channelStates[channelId].name;
-                    if (channelName) {
-                        this.socket.emit('join', { channel: channelName });
-                    }
-                });
-            });
-            
-            this.socket.on('message_created', (data) => {
-                if (data.author_id !== this.currentUserId) {
-                    // Find channel ID using the channel name
-                    const channelId = Object.keys(this.channelStates).find(id => 
-                        this.channelStates[id].name === data.channel
-                    );
-                    
-                    if (channelId) {
-                        this.updateUnreadCount(channelId, true);
-                    }
-                }
-            });
-        },
-
-        getUnreadCount(channelId) {
-            return this.channelStates[channelId]?.unreadCount || 0;
-        },
-
-        updateUnreadCount(channelId, increment = true) {
-            if (!this.channelStates[channelId]) return;
-            
-            if (increment) {
-                this.channelStates[channelId].unreadCount++;
-            } else {
-                this.channelStates[channelId].unreadCount = Math.max(0, this.channelStates[channelId].unreadCount - 1);
-            }
-            
-            // Store updated count in local storage
-            try {
-                const unreadCounts = JSON.parse(localStorage.getItem('unreadCounts') || '{}');
-                unreadCounts[channelId] = this.channelStates[channelId].unreadCount;
-                localStorage.setItem('unreadCounts', JSON.stringify(unreadCounts));
-            } catch (error) {
-                console.error('Error updating local storage:', error);
-            }
-            
-            // Force Alpine to recognize the change
-            this.channelStates = { ...this.channelStates };
-        }
-    }))
-});
-</script>
+<script src="{{ url_for('people_bp.static', filename='js/chat.js') }}"></script>
 {% endblock %} 
