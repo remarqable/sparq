@@ -1,0 +1,402 @@
+{% extends "base-mobile.html" %}
+
+{% block title %}{{ channel.name }} - {{ _("Chat") }}{% endblock %}
+
+{% block additional_styles %}
+<link rel="stylesheet" href="{{ url_for('people_bp.static', filename='css/people.css') }}">
+<link rel="stylesheet" href="{{ url_for('people_bp.static', filename='css/chat.css') }}">
+<style>
+    :root {
+        --font-family: -apple-system, "SF Pro Text", "SF Pro", "SF Pro Display", system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+        font-family: var(--font-family);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .chat-container {
+        height: calc(100vh - var(--header-height) - var(--footer-height));
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-ground);
+    }
+
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        max-width: 85%;
+        font-size: 1.125rem;
+        align-items: flex-start;
+    }
+
+    .message-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.5rem;
+        background: var(--surface-card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+
+    .message-content {
+        background: white;
+        padding: 1rem;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-color-secondary);
+        width: 100%;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .message-text {
+        word-break: break-word;
+        font-size: 1.125rem;
+        line-height: 1.5;
+        width: 100%;
+        color: var(--text-color);
+        margin: 0.25rem 0 0.75rem 0;
+    }
+
+    .message-controls {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: auto;
+        justify-content: flex-end;
+    }
+
+    .message-control {
+        color: rgb(var(--module-color-rgb));
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 1.375rem;
+        opacity: 0.75;
+        transition: opacity 0.2s;
+    }
+
+    .message-control:hover {
+        opacity: 1;
+    }
+
+    .message-control.active {
+        color: rgb(var(--module-color-rgb));
+        opacity: 1;
+    }
+
+    .input-container {
+        padding: 1rem;
+        background: var(--surface-card);
+        border-top: 1px solid var(--surface-border);
+    }
+
+    .message-form {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .message-input {
+        flex: 1;
+        border: 1px solid var(--surface-border);
+        border-radius: 1.5rem;
+        padding: 1rem 1.25rem;
+        resize: none;
+        background: var(--surface-ground);
+        color: var(--text-color);
+        max-height: 120px;
+        min-height: 48px;
+        font-size: 1.125rem;
+    }
+
+    .send-button {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgb(var(--module-color-rgb));
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.375rem;
+    }
+
+    .message-text a {
+        color: inherit;
+        text-decoration: underline;
+    }
+
+    .message-text img {
+        max-width: 100%;
+        border-radius: 0.5rem;
+    }
+
+    .message-text pre {
+        background: rgba(0,0,0,0.05);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+    }
+
+    .message-time {
+        font-size: 1rem;
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mobile-header">
+    <a href="{{ url_for('people_bp.chat') }}" class="back-button">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    <div class="header-title">
+        <div class="icon-wrapper">
+            <i class="fas fa-hashtag"></i>
+        </div>
+        <h1>{{ channel.name }}</h1>
+    </div>
+    <div></div>
+</div>
+
+<div class="chat-container" x-data="chatApp" x-init="initializeApp">
+    <meta name="user-id" content="{{ current_user.id }}">
+    <meta name="channel-id" content="{{ channel.id }}">
+    <div class="messages-container" id="messages" x-ref="chatMessages">
+        {% for message in messages %}
+        <div class="message" data-message-id="{{ message.id }}" id="message-{{ message.id }}">
+            <div class="message-avatar">
+                {{ message.author.first_name[0] }}{{ message.author.last_name[0] }}
+            </div>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-sender">{{ message.author.first_name }} {{ message.author.last_name }}</span>
+                    <span class="message-time">{{ message.created_at|timeago }}</span>
+                </div>
+                <div class="message-text">
+                    {{ message.content|urlize|safe }}
+                </div>
+                <div class="message-controls">
+                    <button class="message-control" title="Reply">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="message-control" title="Like">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="message-control {% if message.pinned %}active{% endif %}" title="Pin">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                    {% if message.author_id == current_user.id %}
+                    <button class="message-control" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="input-container">
+        <form class="message-form" id="messageForm" @submit.prevent="sendMessage">
+            <textarea 
+                class="message-input" 
+                placeholder="{{ _('Type a message...') }}"
+                id="messageInput"
+                x-model="messageContent"
+                rows="1"></textarea>
+            <button type="submit" class="send-button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('chatApp', () => ({
+        socket: null,
+        messageContent: '',
+        currentUserId: parseInt(document.querySelector('meta[name="user-id"]').content),
+        currentChannelId: parseInt(document.querySelector('meta[name="channel-id"]').content),
+        unreadCounts: {},
+        channelStates: {
+            [this.currentChannelId]: {
+                unreadCount: {{ ChatMessageState.get_unread_count(current_user.id, channel.id) }},
+                name: '{{ channel.name }}'
+            }
+        },
+
+        initializeApp() {
+            this.initializeSocket();
+            this.setupMessageObserver();
+        },
+
+        initializeSocket() {
+            this.socket = io();
+            
+            this.socket.on('connect', () => {
+                this.socket.emit('join', { channel: '{{ channel.name }}' });
+            });
+            
+            this.socket.on('message_created', (data) => {
+                if (data.author_id !== this.currentUserId) {
+                    // Reload messages when new message arrives
+                    this.loadNewMessages();
+                    
+                    // Update unread count
+                    if (data.channel === '{{ channel.name }}' && document.hidden) {
+                        this.updateUnreadCount(true);
+                    }
+                }
+            });
+        },
+
+        setupMessageObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const messageId = parseInt(entry.target.getAttribute('id').replace('message-', ''));
+                        
+                        // Mark message as read
+                        fetch(`/people/chat/channels/{{ channel.name }}/mark_read`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        }).then(() => {
+                            this.updateUnreadCount(false);
+                            observer.unobserve(entry.target);
+                        }).catch(error => {
+                            console.error('Error marking message as read:', error);
+                        });
+                    }
+                });
+            }, {
+                root: this.$refs.chatMessages,
+                threshold: 0.5
+            });
+
+            // Observe unread messages
+            const messages = document.querySelectorAll('.message');
+            const unreadCount = {{ ChatMessageState.get_unread_count(current_user.id, channel.id) }};
+            if (unreadCount > 0) {
+                Array.from(messages).reverse().slice(0, unreadCount).forEach(message => {
+                    observer.observe(message);
+                });
+            }
+        },
+
+        updateUnreadCount(increment = true) {
+            const channelId = this.currentChannelId;
+            if (!this.channelStates[channelId]) {
+                this.channelStates[channelId] = { unreadCount: 0, name: '{{ channel.name }}' };
+            }
+            
+            if (increment) {
+                this.channelStates[channelId].unreadCount++;
+            } else {
+                this.channelStates[channelId].unreadCount = Math.max(0, this.channelStates[channelId].unreadCount - 1);
+            }
+            
+            // Store updated count in local storage
+            try {
+                const unreadCounts = JSON.parse(localStorage.getItem('unreadCounts') || '{}');
+                unreadCounts[channelId] = this.channelStates[channelId].unreadCount;
+                localStorage.setItem('unreadCounts', JSON.stringify(unreadCounts));
+            } catch (error) {
+                console.error('Error updating local storage:', error);
+            }
+        },
+
+        async loadNewMessages() {
+            try {
+                const response = await fetch(`/people/chat/channels/{{ channel.name }}/messages`);
+                if (!response.ok) throw new Error('Failed to load messages');
+                const html = await response.text();
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                
+                const newMessages = Array.from(tempDiv.querySelectorAll('.message'));
+                const currentMessages = Array.from(document.querySelectorAll('.message'));
+                
+                // Add only new messages
+                newMessages.forEach(newMsg => {
+                    const msgId = newMsg.getAttribute('data-message-id');
+                    if (!currentMessages.find(msg => msg.getAttribute('data-message-id') === msgId)) {
+                        this.$refs.chatMessages.appendChild(newMsg);
+                    }
+                });
+                
+                this.scrollToBottom();
+            } catch (error) {
+                console.error('Error loading new messages:', error);
+            }
+        },
+
+        scrollToBottom() {
+            const chatMessages = this.$refs.chatMessages;
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        },
+
+        async sendMessage() {
+            if (!this.messageContent.trim()) return;
+            
+            try {
+                const response = await fetch(`/people/chat/channels/{{ channel.name }}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ content: this.messageContent })
+                });
+                
+                if (!response.ok) throw new Error('Failed to send message');
+                
+                this.messageContent = '';
+                this.loadNewMessages();
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+    }))
+});
+</script>
+{% endblock %} 

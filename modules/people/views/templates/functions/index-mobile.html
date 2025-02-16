@@ -328,62 +328,7 @@
     </div>
 </div>
 
-<script>
-// Check if View Transitions API is supported
-if (document.startViewTransition) {
-    // Handle navigation
-    document.addEventListener('click', async e => {
-        // Find closest link
-        const link = e.target.closest('a');
-        if (!link || !link.href) return;
 
-        // Prevent default navigation
-        e.preventDefault();
-
-        // Check if it's a back navigation
-        const isBack = link.classList.contains('back-link');
-        if (isBack) {
-            document.documentElement.classList.add('back-transition');
-        }
-
-        try {
-            // Start view transition
-            const transition = document.startViewTransition(async () => {
-                // Fetch new page
-                const response = await fetch(link.href, {
-                    headers: {
-                        'HX-Request': 'true'
-                    }
-                });
-                const html = await response.text();
-
-                // Update the DOM
-                document.body.innerHTML = html;
-                
-                // Update URL
-                history.pushState({}, '', link.href);
-            });
-
-            // Wait for transition to complete
-            await transition.finished;
-
-        } catch (error) {
-            console.error('Error during transition:', error);
-        } finally {
-            // Clean up
-            document.documentElement.classList.remove('back-transition');
-        }
-    });
-
-    // Handle back button
-    window.addEventListener('popstate', () => {
-        document.documentElement.classList.add('back-transition');
-        document.startViewTransition(() => {
-            location.reload();
-        });
-    });
-}
-</script>
 {% endblock %}
 
 {% block scripts %}

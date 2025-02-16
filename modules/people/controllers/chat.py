@@ -7,6 +7,8 @@ from flask_login import login_required
 from flask_socketio import emit
 from flask_socketio import join_room
 from flask_socketio import leave_room
+from flask import redirect
+from flask import url_for
 
 from system.db.database import db
 from modules.core.models.user import User
@@ -16,6 +18,8 @@ from ..models.chat import Chat
 from ..models.chat import InteractionType
 from ..models.chat import ChatMessageState
 from . import blueprint
+from system.utils import is_mobile
+
 
 
 @blueprint.route("/chat")
@@ -31,6 +35,14 @@ def chat():
         db.session.add(default_channel)
         db.session.commit()
 
+    if is_mobile():
+        return render_template(
+            "chat/index-mobile.html",
+            channels=channels,
+            ChatMessageState=ChatMessageState,
+            title="Chat"
+        )
+    
     return render_template(
         "chat/index-desktop.html",
         active_page="chat",
@@ -50,14 +62,32 @@ def get_channel_messages(channel_name):
         # Get query parameters
         before_id = request.args.get('before_id', type=int)
         limit = request.args.get('limit', 10, type=int)
+        pinned_only = request.args.get('pinned_only', '').lower() == 'true'
+        search_query = request.args.get('search', '').strip()
         
         # Get channel
         channel = Channel.query.filter_by(name=channel_name).first()
         if not channel:
             return f"Channel {channel_name} not found", 404
             
-        # Build query - First get total count and latest ID
-        total_messages = channel.messages.count()
+        # Build base query
+        query = channel.messages
+        
+        # Apply filters
+        if pinned_only:
+            query = query.filter(Chat.pinned == True)
+            
+        if search_query:
+            search_terms = f"%{search_query}%"
+            query = query.join(User, Chat.author_id == User.id).filter(
+                db.or_(
+                    Chat.content.ilike(search_terms),
+                    (User.first_name + ' ' + User.last_name).ilike(search_terms)
+                )
+            )
+            
+        # Get total count
+        total_messages = query.count()
         if total_messages == 0:
             return render_template(
                 "chat/partials/chat-list-desktop.html",
@@ -72,15 +102,15 @@ def get_channel_messages(channel_name):
         
         # If before_id is not provided, get the latest messages
         if not before_id:
-            messages = channel.messages.order_by(Chat.created_at.desc()).limit(limit).all()
+            messages = query.order_by(Chat.created_at.desc()).limit(limit).all()
             messages = messages[::-1]  # Reverse to show in ascending order
-            has_more = channel.messages.filter(Chat.id < messages[0].id).first() is not None
+            has_more = query.filter(Chat.id < messages[0].id).first() is not None
             oldest_id = messages[0].id
         else:
             # Get messages before the given ID
-            messages = channel.messages.filter(Chat.id < before_id).order_by(Chat.created_at.desc()).limit(limit).all()
+            messages = query.filter(Chat.id < before_id).order_by(Chat.created_at.desc()).limit(limit).all()
             messages = messages[::-1]  # Reverse to show in ascending order
-            has_more = channel.messages.filter(Chat.id < messages[0].id).first() is not None if messages else False
+            has_more = query.filter(Chat.id < messages[0].id).first() is not None if messages else False
             oldest_id = messages[0].id if messages else None
             
         # Mark messages as read for the current user
@@ -345,3 +375,26 @@ def on_leave(data):
     if channel:
         leave_room(channel)
         emit("status", {"msg": f"{current_user.first_name} has left the channel."}, room=channel)
+
+
+@blueprint.route("/chat/channel/<channel_name>")
+@login_required
+def chat_channel(channel_name):
+    """Chat channel view"""
+    channel = Channel.query.filter_by(name=channel_name).first_or_404()
+    messages = channel.messages.order_by(Chat.created_at.desc()).limit(50).all()
+    messages.reverse()  # Show in chronological order
+    
+    # Mark channel as read
+    ChatMessageState.mark_channel_read(current_user.id, channel.id)
+    
+    if is_mobile():
+        return render_template(
+            "chat/channel-mobile.html",
+            channel=channel,
+            messages=messages,
+            title=f"#{channel_name}"
+        )
+        
+    # Return error or redirect for desktop
+    return redirect(url_for('people_bp.chat'))

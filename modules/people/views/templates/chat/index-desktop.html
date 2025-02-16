@@ -14,10 +14,35 @@
     {% include 'people_nav.html' with context %}
     
     <div class="content-wrapper flex-grow-1">
-        <!-- Add user ID meta tag -->
+        <!-- Add meta tags for initialization -->
         <meta name="user-id" content="{{ current_user.id }}">
+        <meta name="default-channel" content="{{ default_channel.name }}">
+        <meta name="default-channel-description" content="{{ default_channel.description }}">
+        
+        <!-- API endpoints -->
+        <meta name="api-urls" content='{{ {
+            "create_message": url_for("people_bp.create_chat"),
+            "create_channel": url_for("people_bp.create_channel"),
+            "get_messages": url_for("people_bp.get_channel_messages", channel_name=":channel"),
+            "mark_read": url_for("people_bp.mark_channel_read", channel_name=":channel"),
+            "delete_message": "/people/chat/:id",
+            "delete_channel": url_for("people_bp.delete_channel", channel_name=":channel"),
+            "toggle_pin": "/people/chat/:id/pin"
+        } | tojson | safe }}'>
+        
+        <!-- Channel data for JavaScript initialization -->
+        <meta name="channel-data" content='{"channels": [
+            {% for channel in channels %}
+            {
+                "id": {{ channel.id }},
+                "name": "{{ channel.name }}",
+                "description": "{{ channel.description }}",
+                "unreadCount": {{ ChatMessageState.get_unread_count(current_user.id, channel.id) }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]}'>
 
-        <div class="content-card" x-data="chatApp" x-init="initializeApp" @delete-message.window="deleteMessage()">
+        <div class="content-card" x-data="chatApp" x-init="initializeApp" @delete-message.window="deleteMessage">
             <div class="chat-container">
                 <div class="chat-layout">
                     <!-- Channel Sidebar -->
@@ -45,7 +70,7 @@
                                     <span class="unread-badge" 
                                           x-show="getUnreadCount(id) > 0" 
                                           x-text="getUnreadCount(id)"></span>
-                                    {% if current_user.is_admin %}
+                                    {% if current_user.is_admin and channel.name != 'general' %}
                                     <div class="channel-actions">
                                         <div class="dropdown" x-data="{ open: false }">
                                             <button class="btn btn-link btn-sm channel-options" 
@@ -60,12 +85,10 @@
                                                 <li><a class="dropdown-item" href="#" @click.prevent="editChannel(name, id); open = false">
                                                     <i class="fas fa-edit me-2"></i>{{ _('Edit Channel') }}
                                                 </a></li>
-                                                {% if channel.name != 'general' %}
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li><a class="dropdown-item text-danger" href="#" @click.prevent="confirmDeleteChannel(name); open = false">
                                                     <i class="fas fa-trash-alt me-2"></i>{{ _('Delete Channel') }}
                                                 </a></li>
-                                                {% endif %}
                                             </ul>
                                         </div>
                                     </div>
@@ -111,48 +134,42 @@
 
                         <footer class="message-input-area">
                             <form class="message-form" @submit.prevent="sendMessage">
-                                <div class="format-toolbar">
-                                    <button type="button" class="btn btn-sm btn-link" title="{{ _('Bold') }}">
-                                        <i class="fas fa-bold"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-link" title="{{ _('Italic') }}">
-                                        <i class="fas fa-italic"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-link" title="{{ _('Strikethrough') }}">
-                                        <i class="fas fa-strikethrough"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-link" title="{{ _('Code') }}">
-                                        <i class="fas fa-code"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-link" title="{{ _('Link') }}">
-                                        <i class="fas fa-link"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-link" title="{{ _('List') }}">
-                                        <i class="fas fa-list-ul"></i>
-                                    </button>
+                                <div class="message-format-header">
+                                    <div class="format-actions">
+                                        <button type="button" class="format-button" title="Bold">
+                                            <i class="fas fa-bold"></i>
+                                        </button>
+                                        <button type="button" class="format-button" title="Italic">
+                                            <i class="fas fa-italic"></i>
+                                        </button>
+                                        <div class="format-divider"></div>
+                                        <button type="button" class="format-button" title="Bullet List">
+                                            <i class="fas fa-list-ul"></i>
+                                        </button>
+                                        <button type="button" class="format-button" title="Numbered List">
+                                            <i class="fas fa-list-ol"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                
-                                <div class="input-group">
-                                    <textarea class="form-control" 
-                                             x-model="forms.message.content"
-                                             x-bind:placeholder="`Message in #${currentChannel}`"
-                                             rows="1"></textarea>
-                                    <button type="submit" class="btn btn-link send-button" title="{{ _('Send message') }}">
+                                <div class="message-input-wrapper">
+                                    <textarea class="message-input" 
+                                            x-model="messageContent" 
+                                            @keydown.enter.exact.prevent="sendMessage" 
+                                            placeholder="Type a message..."></textarea>
+                                    <button type="submit" class="send-button" :disabled="!messageContent.trim()">
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
                                 </div>
-                                <div class="message-footer">
-                                    <div class="message-actions">
-                                        <button type="button" class="btn btn-link" title="{{ _('Add attachment') }}">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-link" title="{{ _('Add emoji') }}">
+                                <div class="message-format-footer">
+                                    <div class="format-actions">
+                                        <button type="button" class="format-button" title="Add Emoji">
                                             <i class="far fa-smile"></i>
                                         </button>
-                                        <button type="button" class="btn btn-link" title="{{ _('Mention someone') }}">
+                                        <button type="button" class="format-button" title="Mention Someone">
                                             <i class="fas fa-at"></i>
                                         </button>
                                     </div>
+                                    
                                 </div>
                             </form>
                         </footer>
@@ -164,11 +181,7 @@
 </div>
 
 <!-- Delete Message Modal -->
-<div class="modal fade" 
-     id="deleteModal"
-     tabindex="-1" 
-     aria-hidden="true"
-     x-data>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" x-data>
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -187,11 +200,7 @@
 </div>
 
 <!-- Delete Channel Modal -->
-<div class="modal fade" 
-     id="deleteChannelModal"
-     tabindex="-1" 
-     aria-hidden="true"
-     x-data>
+<div class="modal fade" id="deleteChannelModal" tabindex="-1" aria-hidden="true" x-data>
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -212,46 +221,7 @@
 
 <!-- New Channel Modal -->
 <div class="modal fade" id="newChannelModal" tabindex="-1" aria-labelledby="newChannelModalLabel" aria-hidden="true" 
-     x-data="{ 
-         name: '', 
-         description: '', 
-         isPrivate: false,
-         submit(e) {
-             e.preventDefault();
-             const formData = new FormData();
-             formData.append('name', this.name.trim());
-             formData.append('description', this.description.trim());
-             formData.append('is_private', this.isPrivate);
-
-             fetch(`{{ url_for('people_bp.create_channel') }}`, {
-                 method: 'POST',
-                 body: formData
-             })
-             .then(response => {
-                 if (!response.ok) {
-                     return response.text().then(text => {
-                         try {
-                             const json = JSON.parse(text);
-                             throw new Error(json.error || 'Failed to create channel');
-                         } catch (e) {
-                             throw new Error(text || 'Failed to create channel');
-                         }
-                     });
-                 }
-                 return response.json();
-             })
-             .then(data => {
-                 console.log('Channel created successfully:', data);
-                 const modal = bootstrap.Modal.getInstance(document.getElementById('newChannelModal'));
-                 modal.hide();
-                 window.location.reload();
-             })
-             .catch(error => {
-                 console.error('Error creating channel:', error);
-                 alert('Error creating channel: ' + error.message);
-             });
-         }
-     }">
+     x-data="{ name: '', description: '', isPrivate: false, submit(e) { $dispatch('create-channel', { name: this.name, description: this.description, isPrivate: this.isPrivate }); } }">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -262,26 +232,16 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="channel-name" class="form-label">{{ _('Channel Name') }}</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="channel-name"
-                               x-model="name" 
-                               required>
+                        <input type="text" class="form-control" id="channel-name" x-model="name" required>
                         <small class="form-text text-muted">{{ _('Channel names can only contain lowercase letters, numbers, and hyphens.') }}</small>
                     </div>
                     <div class="mb-3">
                         <label for="channel-description" class="form-label">{{ _('Description') }}</label>
-                        <textarea class="form-control" 
-                                id="channel-description"
-                                x-model="description" 
-                                rows="2"></textarea>
+                        <textarea class="form-control" id="channel-description" x-model="description" rows="2"></textarea>
                     </div>
                     {% if current_user.is_admin %}
                     <div class="mb-3 form-check">
-                        <input type="checkbox" 
-                               class="form-check-input" 
-                               id="channel-private"
-                               x-model="isPrivate">
+                        <input type="checkbox" class="form-check-input" id="channel-private" x-model="isPrivate">
                         <label class="form-check-label" for="channel-private">{{ _('Private Channel') }}</label>
                     </div>
                     {% endif %}
@@ -296,7 +256,8 @@
 </div>
 
 <!-- Edit Channel Modal -->
-<div class="modal fade" id="editChannelModal" tabindex="-1" aria-labelledby="editChannelModalLabel" aria-hidden="true">
+<div class="modal fade" id="editChannelModal" tabindex="-1" aria-labelledby="editChannelModalLabel" aria-hidden="true" 
+     x-data="{ description: '', isPrivate: false, updateChannel(e) { $dispatch('update-channel', { description: this.description, isPrivate: this.isPrivate }); } }">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -307,11 +268,11 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="edit-description" class="form-label">{{ _('Description') }}</label>
-                        <textarea class="form-control" id="edit-description" x-model="forms.editChannel.description" rows="2"></textarea>
+                        <textarea class="form-control" id="edit-description" x-model="description" rows="2"></textarea>
                     </div>
                     {% if current_user.is_admin %}
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" x-model="forms.editChannel.isPrivate">
+                        <input type="checkbox" class="form-check-input" x-model="isPrivate">
                         <label class="form-check-label">{{ _('Private Channel') }}</label>
                     </div>
                     {% endif %}
@@ -324,659 +285,13 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('chatApp', () => ({
-        socket: null,
-        currentChannel: '{{ default_channel.name }}',
-        currentChannelDescription: '{{ default_channel.description }}',
-        currentUserId: parseInt(document.querySelector('meta[name="user-id"]').content),
-        showPinnedOnly: false,
-        messageToDelete: null,
-        searchQuery: '',
-        pinnedMessagesCount: 0,
-        isLoading: true,
-        chatMessages: '',
-        unreadCounts: {},
-        channelStates: Object.fromEntries([
-            {% for channel in channels %}
-            [{{ channel.id }}, {
-                unreadCount: {{ ChatMessageState.get_unread_count(current_user.id, channel.id) }},
-                description: '{{ channel.description }}',
-                name: '{{ channel.name }}'
-            }],
-            {% endfor %}
-        ]),
-        loadMoreState: {
-            isLoading: false,
-            error: null
-        },
-        scrollPosition: {
-            top: 0,
-            height: 0
-        },
-        modals: {},
-        forms: {
-            newChannel: {
-                name: '',
-                description: '',
-                isPrivate: false
-            },
-            editChannel: {
-                name: '',
-                description: '',
-                isPrivate: false
-            },
-            message: {
-                content: ''
-            }
-        },
-        channelToDelete: null,
-        messages: [],
-        oldestMessageId: null,
-        messageObserver: null,
-        
-        get filteredMessages() {
-            if (!this.showPinnedOnly && !this.searchQuery) {
-                return this.chatMessages;
-            }
-            
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(this.chatMessages, 'text/html');
-            const messages = Array.from(doc.querySelectorAll('.message'));
-            
-            messages.forEach(message => {
-                let show = true;
-                
-                if (this.showPinnedOnly && !message.classList.contains('pinned')) {
-                    show = false;
-                }
-                
-                if (show && this.searchQuery) {
-                    const content = message.querySelector('.message-content')?.textContent.toLowerCase() || '';
-                    const author = message.querySelector('.message-meta .author')?.textContent.toLowerCase() || '';
-                    show = content.includes(this.searchQuery.toLowerCase()) || 
-                          author.includes(this.searchQuery.toLowerCase());
-                }
-                
-                if (!show) {
-                    message.remove();
-                }
-            });
-            
-            return doc.body.innerHTML;
-        },
-        
-        initializeApp() {
-            // Load unread counts from local storage
-            try {
-                const storedCounts = JSON.parse(localStorage.getItem('unreadCounts') || '{}');
-                Object.keys(storedCounts).forEach(channelId => {
-                    if (this.channelStates[channelId]) {
-                        this.channelStates[channelId].unreadCount = storedCounts[channelId];
-                    }
-                });
-            } catch (error) {
-                console.error('Error loading unread counts from storage:', error);
-            }
-
-            this.initializeSocket();
-            this.loadChannelMessages(this.currentChannel);
-            this.initializeModals();
-            this.initializeBootstrapComponents();
-            
-            // Add event listener for delete-channel
-            window.addEventListener('delete-channel', () => this.deleteChannel());
-        },
-
-        initializeSocket() {
-            this.socket = io();
-            
-            this.socket.on('connect', () => {
-                // Join all channels to receive updates
-                Object.keys(this.channelStates).forEach(channelId => {
-                    const channelName = this.channelStates[channelId].name;
-                    if (channelName) {
-                        this.socket.emit('join', { channel: channelName });
-                    }
-                });
-            });
-            
-            this.socket.on('chat_changed', (data) => {
-                if (data.channel === this.currentChannel) {
-                    this.loadChannelMessages(this.currentChannel);
-                    // Update pin count if needed
-                    if (data.pinned !== undefined) {
-                        this.$nextTick(() => {
-                            this.updatePinCount();
-                        });
-                    }
-                }
-            });
-            
-            this.socket.on('message_created', (data) => {
-                // Find channel ID using the channel name
-                const channelId = Object.keys(this.channelStates).find(id => 
-                    this.channelStates[id].name === data.channel
-                );
-                
-                if (channelId && data.author_id !== this.currentUserId) {
-                    if (data.channel === this.currentChannel) {
-                        // User is in the channel where message was created
-                        // Just reload messages - don't mark as read yet
-                        this.loadChannelMessages(this.currentChannel);
-                    } else {
-                        // User is not in the channel, increment unread count
-                        this.updateChannelUnreadCount(channelId, true, 1);
-                    }
-                }
-            });
-            
-            this.socket.on('channel_deleted', (data) => {
-                if (data.name === this.currentChannel) {
-                    this.switchChannel('general');
-                } else {
-                    // Remove the channel from channelStates
-                    const channelId = Object.keys(this.channelStates).find(id => 
-                        this.channelStates[id].name === data.name
-                    );
-                    if (channelId) {
-                        delete this.channelStates[channelId];
-                        this.channelStates = { ...this.channelStates };
-                    }
-                }
-            });
-        },
-
-        joinChannel(channelName) {
-            if (this.socket && this.socket.connected) {
-                this.socket.emit('join', { channel: channelName });
-            }
-        },
-
-        leaveChannel(channelName) {
-            if (this.socket && this.socket.connected) {
-                this.socket.emit('leave', { channel: channelName });
-            }
-        },
-
-        switchChannel(channelName, channelId) {
-            this.leaveChannel(this.currentChannel);
-            this.currentChannel = channelName;
-            
-            if (channelId) {
-                // Don't reset unread count immediately anymore
-                if (this.channelStates[channelId]?.description) {
-                    this.currentChannelDescription = this.channelStates[channelId].description;
-                }
-            }
-
-            this.showPinnedOnly = false;
-            this.searchQuery = '';
-            this.joinChannel(channelName);
-            this.loadChannelMessages(channelName);
-        },
-
-        async loadChannelMessages(channelName, isLoadMore = false) {
-            if (!isLoadMore) {
-                this.isLoading = true;
-                this.chatMessages = '<div class="loading-indicator text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
-            }
-
-            try {
-                let url = `/people/chat/channels/${channelName}/messages?limit=10`;
-                if (isLoadMore && this.oldestMessageId) {
-                    url += `&before_id=${this.oldestMessageId}`;
-                }
-                
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to load messages');
-                
-                const html = await response.text();
-                
-                // Get channel ID before modifying DOM
-                const channelId = Object.keys(this.channelStates).find(id => 
-                    this.channelStates[id].name === channelName
-                );
-                
-                if (isLoadMore) {
-                    const chatMessages = this.$refs.chatMessages;
-                    const scrollPosition = {
-                        top: chatMessages.scrollTop,
-                        height: chatMessages.scrollHeight
-                    };
-                    
-                    // Create a temporary container to parse the HTML
-                    const tempContainer = document.createElement('div');
-                    tempContainer.innerHTML = html;
-                    
-                    // Get the new messages, excluding the load more button if present
-                    const newMessages = Array.from(tempContainer.querySelectorAll('.message'));
-                    
-                    if (newMessages.length > 0) {
-                        // Update oldest message ID before inserting new messages
-                        this.oldestMessageId = newMessages[0].getAttribute('id').replace('message-', '');
-                        
-                        // Insert the load more button if it exists in the response
-                        const loadMoreContainer = tempContainer.querySelector('.load-more-container');
-                        if (loadMoreContainer) {
-                            chatMessages.insertAdjacentHTML('afterbegin', loadMoreContainer.outerHTML);
-                        }
-                        
-                        // Insert each new message
-                        newMessages.forEach(message => {
-                            chatMessages.insertAdjacentHTML('afterbegin', message.outerHTML);
-                        });
-                        
-                        // Restore scroll position
-                        const newHeight = chatMessages.scrollHeight;
-                        chatMessages.scrollTop = newHeight - scrollPosition.height + scrollPosition.top;
-                        
-                        // Update unread count if needed
-                        if (channelId) {
-                            const visibleNewMessages = newMessages.length;
-                            if (visibleNewMessages > 0) {
-                                this.updateChannelUnreadCount(channelId, false, visibleNewMessages);
-                            }
-                        }
-                    }
-                } else {
-                    this.chatMessages = html;
-                    
-                    // Get the initial oldest message ID
-                    const messages = document.querySelectorAll('.message');
-                    if (messages.length > 0) {
-                        this.oldestMessageId = messages[0].getAttribute('id').replace('message-', '');
-                    }
-                    
-                    // Count initial visible messages and update unread count
-                    if (channelId) {
-                        const visibleMessages = messages.length;
-                        if (visibleMessages > 0) {
-                            this.updateChannelUnreadCount(channelId, false, visibleMessages);
-                        }
-                    }
-                }
-
-                this.isLoading = false;
-                if (!isLoadMore) {
-                    this.$nextTick(() => {
-                        this.scrollToBottom();
-                        this.setupMessageObserver();
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading messages:', error);
-                if (!isLoadMore) {
-                    this.chatMessages = `<div class="text-center p-4 text-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        Error loading messages. Please try again.
-                    </div>`;
-                }
-                this.isLoading = false;
-            }
-        },
-
-        scrollToBottom() {
-            const chatMessages = this.$refs.chatMessages;
-            if (chatMessages) {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-        },
-        
-        getUnreadCount(channelId) {
-            return this.channelStates[channelId]?.unreadCount || 0;
-        },
-
-        updateChannelUnreadCount(channelId, increment = true, amount = 1) {
-            if (!this.channelStates[channelId]) {
-                this.channelStates[channelId] = { 
-                    unreadCount: 0,
-                    description: '',
-                    name: ''
-                };
-            }
-            
-            if (increment) {
-                this.channelStates[channelId].unreadCount += amount;
-            } else {
-                this.channelStates[channelId].unreadCount = Math.max(0, this.channelStates[channelId].unreadCount - amount);
-            }
-            
-            // Store the updated count in local storage for persistence
-            try {
-                const unreadCounts = JSON.parse(localStorage.getItem('unreadCounts') || '{}');
-                unreadCounts[channelId] = this.channelStates[channelId].unreadCount;
-                localStorage.setItem('unreadCounts', JSON.stringify(unreadCounts));
-            } catch (error) {
-                console.error('Error updating local storage:', error);
-            }
-            
-            // Force Alpine to recognize the change
-            this.channelStates = { ...this.channelStates };
-        },
-
-        async markChannelRead(channelId, channelName) {
-            try {
-                const response = await fetch(`/people/chat/channels/${channelName}/mark_read`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (!response.ok) throw new Error('Failed to mark channel as read');
-                
-                this.updateChannelUnreadCount(channelId, false);
-            } catch (error) {
-                console.error('Error marking channel as read:', error);
-            }
-        },
-
-        initializeMessageActions() {
-            // Using Alpine's $nextTick to ensure DOM is ready
-            this.$nextTick(() => {
-                // Initialize tooltips for message actions
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-                    if (!el._tooltip) {
-                        el._tooltip = new bootstrap.Tooltip(el);
-                    }
-                });
-            });
-        },
-
-        initializeBootstrapComponents() {
-            this.$nextTick(() => {
-                // Initialize tooltips
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-                    if (el._tooltip) {
-                        el._tooltip.dispose();
-                    }
-                    el._tooltip = new bootstrap.Tooltip(el);
-                });
-            });
-        },
-
-        initializeModals() {
-            this.$nextTick(() => {
-                // Initialize Bootstrap modals
-                this.modals = {
-                    delete: new bootstrap.Modal(document.getElementById('deleteModal')),
-                    deleteChannel: new bootstrap.Modal(document.getElementById('deleteChannelModal')),
-                    newChannel: new bootstrap.Modal(document.getElementById('newChannelModal')),
-                    editChannel: new bootstrap.Modal(document.getElementById('editChannelModal'))
-                };
-
-                // Add event listeners for modal cleanup
-                ['deleteModal', 'deleteChannelModal', 'newChannelModal', 'editChannelModal'].forEach(modalId => {
-                    const element = document.getElementById(modalId);
-                    element.addEventListener('hidden.bs.modal', () => {
-                        document.body.classList.remove('modal-open');
-                        const backdrop = document.querySelector('.modal-backdrop');
-                        if (backdrop) backdrop.remove();
-                    });
-                });
-            });
-        },
-
-        showModal(modalName) {
-            if (this.modals[modalName]) {
-                this.modals[modalName].show();
-            }
-        },
-
-        hideModal(modalName) {
-            if (this.modals[modalName]) {
-                this.modals[modalName].hide();
-            }
-        },
-
-        confirmDeleteMessage(messageId) {
-            this.messageToDelete = messageId;
-            this.showModal('delete');
-        },
-
-        deleteMessage() {
-            if (!this.messageToDelete) return;
-
-            fetch(`/people/chat/${this.messageToDelete}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(json => { throw new Error(json.error || 'Failed to delete message') });
-                }
-                this.hideModal('delete');
-                this.messageToDelete = null;
-                this.loadChannelMessages(this.currentChannel);
-            })
-            .catch(error => {
-                alert('Error deleting message: ' + error.message);
-                this.hideModal('delete');
-            });
-        },
-
-        updatePinCount() {
-            this.$nextTick(() => {
-                this.pinnedMessagesCount = document.querySelectorAll('.message.pinned').length;
-            });
-        },
-
-        async sendMessage(e) {
-            e.preventDefault();
-            if (!this.forms.message.content.trim()) return;
-
-            const formData = new FormData();
-            formData.append('content', this.forms.message.content);
-            formData.append('channel', this.currentChannel);
-            
-            try {
-                const response = await fetch(`{{ url_for('people_bp.create_chat') }}`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text);
-                }
-
-                this.forms.message.content = '';
-                // No need to manually scroll here as the chat_changed event will trigger loadChannelMessages
-            } catch (error) {
-                alert('Error sending message: ' + error.message);
-            }
-        },
-
-        togglePinFilter() {
-            this.showPinnedOnly = !this.showPinnedOnly;
-        },
-
-        handleSearch() {
-            // The filteredMessages getter will automatically update
-        },
-
-        loadMoreMessages(oldestId) {
-            if (this.loadMoreState.isLoading) return;
-            this.loadMoreState.isLoading = true;
-            this.loadMoreState.error = null;
-            
-            this.loadChannelMessages(this.currentChannel, true)
-                .then(() => {
-                    this.loadMoreState.isLoading = false;
-                })
-                .catch(error => {
-                    console.error('Error loading more messages:', error);
-                    this.loadMoreState.error = error.message;
-                    this.loadMoreState.isLoading = false;
-                });
-        },
-
-        confirmDeleteChannel(channelName) {
-            this.channelToDelete = channelName;
-            this.showModal('deleteChannel');
-        },
-
-        deleteChannel() {
-            if (!this.channelToDelete) return;
-            
-            fetch(`/people/chat/channels/${this.channelToDelete}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(json => { throw new Error(json.error) });
-                }
-                this.hideModal('deleteChannel');
-                this.channelToDelete = null;
-            })
-            .catch(error => {
-                alert('Error deleting channel: ' + error.message);
-                this.hideModal('deleteChannel');
-            });
-        },
-
-        editChannel(channelName, channelId) {
-            if (channelId && this.channelStates[channelId]) {
-                this.forms.editChannel = {
-                    name: channelName,
-                    description: this.channelStates[channelId].description || '',
-                    isPrivate: false
-                };
-                this.showModal('editChannel');
-            }
-        },
-
-        async updateChannel() {
-            try {
-                const formData = new FormData();
-                formData.append('description', this.forms.editChannel.description);
-                formData.append('is_private', this.forms.editChannel.isPrivate);
-
-                const response = await fetch(`/people/chat/channels/${this.forms.editChannel.name}`, {
-                    method: 'PUT',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text);
-                }
-
-                this.hideModal('editChannel');
-                window.location.reload(); // Refresh to show updated channel info
-            } catch (error) {
-                alert('Error updating channel: ' + error.message);
-            }
-        },
-
-        handleMessageAction(action, messageId) {
-            switch (action) {
-                case 'reply':
-                    alert('Reply feature not implemented yet');
-                    break;
-                case 'like':
-                    alert('Like feature not implemented yet');
-                    break;
-                case 'pin':
-                    this.togglePin(messageId);
-                    break;
-                case 'delete':
-                    this.confirmDeleteMessage(messageId);
-                    break;
-            }
-        },
-
-        togglePin(messageId) {
-            fetch(`/people/chat/${messageId}/pin`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(json => { throw new Error(json.error) });
-                }
-                return response.json();
-            })
-            .then(() => {
-                this.loadChannelMessages(this.currentChannel);
-            })
-            .catch(error => {
-                alert('Error toggling pin: ' + error.message);
-            });
-        },
-
-        setupMessageObserver() {
-            // Disconnect previous observer if exists
-            if (this.messageObserver) {
-                this.messageObserver.disconnect();
-            }
-
-            // Create new intersection observer
-            this.messageObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const messageId = parseInt(entry.target.getAttribute('id').replace('message-', ''));
-                        const channelId = Object.keys(this.channelStates).find(id => 
-                            this.channelStates[id].name === this.currentChannel
-                        );
-                        
-                        if (channelId) {
-                            // Mark individual message as read
-                            fetch(`/people/chat/channels/${this.currentChannel}/mark_read`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' }
-                            }).then(() => {
-                                // Decrement the unread count by 1 for each read message
-                                this.updateChannelUnreadCount(channelId, false, 1);
-                            }).catch(error => {
-                                console.error('Error marking message as read:', error);
-                            });
-                            
-                            // Stop observing this message once it's been marked as read
-                            this.messageObserver.unobserve(entry.target);
-                        }
-                    }
-                });
-            }, {
-                root: this.$refs.chatMessages,
-                threshold: 0.5 // Message is considered read when 50% visible
-            });
-
-            // Only observe unread messages
-            const channelId = Object.keys(this.channelStates).find(id => 
-                this.channelStates[id].name === this.currentChannel
-            );
-            
-            if (channelId) {
-                const unreadCount = this.getUnreadCount(channelId);
-                if (unreadCount > 0) {
-                    // Get all messages in reverse order (newest first)
-                    const messages = Array.from(document.querySelectorAll('.message')).reverse();
-                    // Only observe the number of unread messages from the newest ones
-                    messages.slice(0, unreadCount).forEach(message => {
-                        this.messageObserver.observe(message);
-                    });
-                }
-            }
-        }
-    }))
-})
-</script>
 {% endblock %}
 
-{% block  scripts %}
+{% block scripts %}
 {{ super() }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="{{ url_for('people_bp.static', filename='js/chat.js') }}"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}
 
-{% block additional_scripts %}{% endblock %} 
+{% block additional_scripts %}{% endblock %}

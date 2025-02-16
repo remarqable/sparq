@@ -29,17 +29,13 @@ from modules.people.models.employee import Employee
 from modules.people.models.employee import EmployeeStatus
 from modules.people.models.employee import EmployeeType
 from system.db.database import db
+from system.utils import is_mobile
 
 from . import blueprint
 
 logger = logging.getLogger(__name__)
 
 
-def is_mobile():
-    """Check if the current request is from a mobile device"""
-    user_agent = request.user_agent.string.lower()
-    mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'webos']
-    return any(keyword in user_agent for keyword in mobile_keywords)
 
 
 @blueprint.route("/")
