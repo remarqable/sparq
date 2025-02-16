@@ -7,7 +7,7 @@
 {% block additional_styles %}
 <link rel="stylesheet" href="{{ url_for('people_bp.static', filename='css/people.css') }}">
 <style>
-    /* More specific selectors */
+    /* Employee Actions */
     .employee-actions .btn.action-btn {
         border: none !important;
         background: none !important;
@@ -19,7 +19,6 @@
         align-items: center !important;
         min-width: 30px !important;
         min-height: 30px !important;
-        border: 1px solid red !important;
     }
     
     .employee-actions .btn.action-btn.edit-btn:hover {
@@ -34,13 +33,183 @@
         margin-right: 0;
         font-size: 1rem;
     }
+
+    .employee-actions .btn {
+        color: #adb5bd;
+        padding: 0.375rem;
+    }
+
+    .employee-actions .btn:hover {
+        color: var(--bs-primary);
+    }
+
+    .employee-actions .btn.delete-btn:hover {
+        color: var(--bs-danger);
+    }
+
+    .employee-actions .btn.me-2 {
+        margin-right: 0.25rem !important;
+    }
+
+    /* Employee Details */
+    .employee-details h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .position-title {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-tabs {
+        display: flex;
+        gap: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 1rem;
+    }
+
+    .tab-btn {
+        border: none;
+        background: none;
+        padding: 0.5rem 1rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .tab-btn.active {
+        color: var(--module-color);
+        border-bottom: 2px solid var(--module-color);
+    }
+
+    .info-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .info-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #444;
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+    }
+
+    .info-item label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .editable-field {
+        position: relative;
+        display: inline-block;
+    }
+
+    .edit-btn {
+        opacity: 0;
+        position: absolute;
+        right: -40px;
+        top: 50%;
+        transform: translateY(-70%);
+        border: none;
+        background: none;
+        color: var(--bs-primary);
+        transition: all 0.2s;
+        cursor: pointer;
+        padding: 5px 10px;
+        margin-left: 10px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .editable-field:hover .edit-btn {
+        opacity: 1;
+        right: -45px;
+    }
+
+    .field-value {
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .btn-outline-secondary {
+        border-color: #dee2e6;
+        color: #adb5bd;
+        opacity: 0.6;
+        transition: all 0.2s;
+    }
+
+    .btn-outline-secondary:hover {
+        border-color: #dc3545;
+        color: #dc3545;
+        background-color: transparent;
+        opacity: 1;
+    }
+
+    .content-card {
+        position: relative;
+        padding: 1.5rem;
+    }
+
+    .employee-details {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-buttons {
+        position: relative;
+        right: 0;
+        top: 0;
+        margin-left: 1rem;
+        white-space: nowrap;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .info-section {
+            background: #2d2d2d;
+        }
+
+        .info-section h3 {
+            color: #dee2e6;
+        }
+
+        .info-item label {
+            color: #adb5bd;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-flex">
     {% include 'people_nav.html' with context %}
-    
     <div class="content-wrapper flex-grow-1">
         <div class="content-card">
             <div class="d-flex justify-content-between align-items-start mb-4">
@@ -66,21 +235,6 @@
                     </p>
                 </div>
                 <div class="employee-actions">
-                    <style>
-                        .employee-actions .btn {
-                            color: #adb5bd;
-                            padding: 0.375rem;
-                        }
-                        .employee-actions .btn:hover {
-                            color: var(--bs-primary);
-                        }
-                        .employee-actions .btn.delete-btn:hover {
-                            color: var(--bs-danger);
-                        }
-                        .employee-actions .btn.me-2 {
-                            margin-right: 0.25rem !important;
-                        }
-                    </style>
                     <a href="{{ url_for('people_bp.edit_employee', employee_id=employee.id) }}" 
                        class="btn me-2" title="{{ _('Edit') }}">
                         <i class="fas fa-edit"></i>
@@ -107,170 +261,113 @@
                 </div>
             </div>
 
-            <div class="detail-tabs mt-4">
-                <button class="tab-btn active" data-tab="main">{{ _("Main") }}</button>
-                <button class="tab-btn" data-tab="personal">{{ _("Personal") }}</button>
+            <div class="detail-tabs">
+                <button class="tab-btn active" data-tab="main">{{ _("Main Info") }}</button>
+                <button class="tab-btn" data-tab="personal">{{ _("Personal Info") }}</button>
             </div>
 
-            <div class="detail-sections mt-4">
-                <!-- Main Tab Content -->
-                <div class="tab-content active" id="main-tab">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="info-section">
-                                <h3>{{ _("Employment") }}</h3>
-                                <div class="info-item">
-                                    <label>{{ _("Hire Date") }}</label>
-                                    <div>{{ employee.start_date|format_date if employee.start_date else _('Not set') }}</div>
-                                </div>
-                                <div class="info-item">
-                                    <label>{{ _("Employment Type") }}</label>
-                                    <div>{{ employee.type.value if employee.type else _('Not set') }}</div>
-                                </div>
-                                <div class="info-item">
-                                    <label>{{ _("Manager") }}</label>
-                                    <div>
-                                        {% if employee.manager %}
-                                            <a href="{{ url_for('people_bp.employee_detail', employee_id=employee.manager.id) }}" class="text-decoration-none">
-                                                {{ employee.manager.user.first_name }} {{ employee.manager.user.last_name }}
-                                            </a>
-                                        {% else %}
-                                            <span class="text-muted">{{ _('Not assigned') }}</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% if employee.reports %}
-                                <div class="info-item">
-                                    <label>{{ _("Direct Reports") }}</label>
-                                    <div>
-                                        {% for report in employee.reports %}
-                                        <div class="mb-1">
-                                            <a href="{{ url_for('people_bp.employee_detail', employee_id=report.id) }}" class="text-decoration-none">
-                                                {{ report.user.first_name }} {{ report.user.last_name }}
-                                            </a>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                {% endif %}
-                                <div class="info-item">
-                                    <label>{{ _("Compensation") }}</label>
-                                    <div>{{ employee.formatted_salary if employee.salary else _('Not set') }}</div>
-                                </div>
+            <div class="tab-content active" id="main-tab">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="info-section">
+                            <h3>{{ _("Employment") }}</h3>
+                            <div class="info-item">
+                                <label>{{ _("Department") }}</label>
+                                <div>{{ employee.department or _('Not set') }}</div>
                             </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="info-section">
-                                <div class="section-header">
-                                    <h3>{{ _("Notes") }}</h3>
-                                    <button class="btn btn-sm btn-link" title="{{ _('Add Note') }}">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                                <div class="note-item">
-                                    <i class="fas fa-sticky-note"></i>
-                                    <div>
-                                        <div class="note-title">{{ _("Notes coming soon...") }}</div>
-                                        <div class="note-date">{{ _("Coming Soon") }}</div>
-                                    </div>
-                                </div>
+                            <div class="info-item">
+                                <label>{{ _("Position") }}</label>
+                                <div>{{ employee.position or _('Not set') }}</div>
                             </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="info-section">
-                                <div class="section-header">
-                                    <h3>{{ _("Documents") }}</h3>
-                                    <button class="btn btn-sm btn-link" title="{{ _('Upload Document') }}">
-                                        <i class="fas fa-upload"></i>
-                                    </button>
-                                </div>
-                                <div class="documents-coming-soon">
-                                    {{ _("Coming Soon") }}
-                                </div>
+                            <div class="info-item">
+                                <label>{{ _("Manager") }}</label>
+                                <div>{{ employee.manager.user.full_name if employee.manager else _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Type") }}</label>
+                                <div>{{ employee.type.value if employee.type else _('Not set') }}</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h3>{{ _("Shortcuts") }}</h3>
-                            <div class="shortcuts-grid">
-                                <div class="shortcut-card">
-                                    <div class="shortcut-icon onboarding">
-                                        <i class="fas fa-clipboard-list"></i>
-                                    </div>
-                                    <h4>{{ _("Onboarding") }}</h4>
-                                    <p>{{ _("%(first_name)s has %(task_count)s tasks to complete onboarding") % {'first_name': employee.user.first_name, 'task_count': 0} }}</p>
-                                </div>
-                                <div class="shortcut-card">
-                                    <div class="shortcut-icon time">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                    <h4>{{ _("Time Tracking") }}</h4>
-                                    <p>{{ _("%(count)s Time Sheets Ready for approval") % {'count': 0} }}</p>
-                                </div>
-                                <div class="shortcut-card">
-                                    <div class="shortcut-icon reimbursement">
-                                        <i class="fas fa-receipt"></i>
-                                    </div>
-                                    <h4>{{ _("Reimbursements") }}</h4>
-                                    <p>{{ _("%(count)s outstanding reimbursements") % {'count': 0} }}</p>
-                                </div>
+                    <div class="col-md-4">
+                        <div class="info-section">
+                            <h3>{{ _("Contact") }}</h3>
+                            <div class="info-item">
+                                <label>{{ _("Email") }}</label>
+                                <div>{{ employee.user.email }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Phone") }}</label>
+                                <div>{{ employee.phone or _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Address") }}</label>
+                                <div>{{ employee.address or _('Not set') }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-section">
+                            <h3>{{ _("Employment Details") }}</h3>
+                            <div class="info-item">
+                                <label>{{ _("Hire Date") }}</label>
+                                <div>{{ employee.hire_date.strftime('%B %d, %Y') if employee.hire_date else _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Status") }}</label>
+                                <div>{{ employee.status.value if employee.status else _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Employee ID") }}</label>
+                                <div>{{ employee.id }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Personal Tab Content -->
-                <div class="tab-content" id="personal-tab" style="display: none;">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="info-section">
-                                <h3>{{ _("Personal Information") }}</h3>
-                                <div class="info-item">
-                                    <label>{{ _("Birthday") }}</label>
-                                    <div>{{ employee.birthday|format_date if employee.birthday else _('Not set') }}</div>
-                                </div>
-                                <div class="info-item">
-                                    <label>{{ _("Gender") }}</label>
-                                    <div>{{ employee.gender.value if employee.gender else _('Not set') }}</div>
-                                </div>
-                                <div class="info-item">
-                                    <label>{{ _("Address") }}</label>
-                                    <div>
-                                        {{ employee.full_address if employee.address else _('Not set') }}
-                                    </div>
-                                </div>
+            <div class="tab-content" id="personal-tab" style="display: none;">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="info-section">
+                            <h3>{{ _("Personal Info") }}</h3>
+                            <div class="info-item">
+                                <label>{{ _("Birthday") }}</label>
+                                <div>{{ employee.birthday.strftime('%B %d, %Y') if employee.birthday else _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Gender") }}</label>
+                                <div>{{ employee.gender or _('Not set') }}</div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-4">
-                            <div class="info-section">
-                                <h3>{{ _("Emergency Contact") }}</h3>
-                                <div class="info-item">
-                                    <label>{{ _("Name") }}</label>
-                                    <div>{{ employee.emergency_contact_name or _('Not set') }}</div>
-                                </div>
-                                <div class="info-item">
-                                    <label>{{ _("Phone") }}</label>
-                                    <div>{{ employee.emergency_contact_phone or _('Not set') }}</div>
-                                </div>
-                                <div class="info-item">
-                                    <label>{{ _("Relationship") }}</label>
-                                    <div>{{ employee.emergency_contact_relationship or _('Not set') }}</div>
-                                </div>
+                    <div class="col-md-4">
+                        <div class="info-section">
+                            <h3>{{ _("Emergency Contact") }}</h3>
+                            <div class="info-item">
+                                <label>{{ _("Name") }}</label>
+                                <div>{{ employee.emergency_contact_name or _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Phone") }}</label>
+                                <div>{{ employee.emergency_contact_phone or _('Not set') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>{{ _("Relationship") }}</label>
+                                <div>{{ employee.emergency_contact_relationship or _('Not set') }}</div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-4">
-                            <div class="info-section">
-                                <h3>{{ _("Social") }}</h3>
-                                <div class="info-item">
-                                    <label>{{ _("Social Media") }}</label>
-                                    <div>hashed_social_1</div>
-                                </div>
+                    <div class="col-md-4">
+                        <div class="info-section">
+                            <h3>{{ _("Social") }}</h3>
+                            <div class="info-item">
+                                <label>{{ _("Social Media") }}</label>
+                                <div>{{ employee.social_media or _('Not set') }}</div>
                             </div>
                         </div>
                     </div>
@@ -327,252 +424,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<style>
-/* Employee Details Styles */
-.employee-details h1 {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-}
-
-.position-title {
-    color: #6c757d;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-}
-
-.contact-info {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.contact-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.detail-tabs {
-    display: flex;
-    gap: 1rem;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 1rem;
-}
-
-.tab-btn {
-    border: none;
-    background: none;
-    padding: 0.5rem 1rem;
-    color: #6c757d;
-    font-weight: 500;
-}
-
-.tab-btn.active {
-    color: var(--module-color);
-    border-bottom: 2px solid var(--module-color);
-}
-
-.info-section {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    height: 100%;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.info-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: #444;
-}
-
-.info-item {
-    margin-bottom: 1rem;
-}
-
-.info-item label {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-}
-
-.note-item {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-}
-
-.note-title {
-    font-weight: 500;
-}
-
-.note-date {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.document-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 4px;
-}
-
-.documents-coming-soon {
-    text-align: center;
-    color: #6c757d;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 4px;
-}
-
-.shortcuts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
-}
-
-.shortcut-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.shortcut-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.shortcut-icon.onboarding {
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-}
-
-.shortcut-icon.time {
-    background: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
-}
-
-.shortcut-icon.reimbursement {
-    background: rgba(102, 16, 242, 0.1);
-    color: #6610f2;
-}
-
-.shortcut-card h4 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-}
-
-.shortcut-card p {
-    color: #6c757d;
-    margin: 0;
-}
-
-.tab-content {
-    transition: opacity 0.3s ease;
-}
-
-.tab-content.active {
-    opacity: 1;
-}
-
-.info-item label {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-bottom: 0.25rem;
-    display: block;
-}
-
-.info-item {
-    margin-bottom: 1rem;
-}
-
-.info-item:last-child {
-    margin-bottom: 0;
-}
-
-.editable-field {
-    position: relative;
-    display: inline-block;
-}
-
-.edit-btn {
-    opacity: 0;
-    position: absolute;
-    right: -40px;
-    top: 50%;
-    transform: translateY(-70%);
-    border: none;
-    background: none;
-    color: var(--bs-primary);
-    transition: all 0.2s;
-    cursor: pointer;
-    padding: 5px 10px;
-    margin-left: 10px;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-}
-
-.editable-field:hover .edit-btn {
-    opacity: 1;
-    right: -45px;
-}
-
-.field-value {
-    display: inline-block;
-    margin-right: 10px;
-}
-
-.btn-outline-secondary {
-    border-color: #dee2e6;
-    color: #adb5bd;
-    opacity: 0.6;
-    transition: all 0.2s;
-}
-
-.btn-outline-secondary:hover {
-    border-color: #dc3545;
-    color: #dc3545;
-    background-color: transparent;
-    opacity: 1;
-}
-
-.content-card {
-    position: relative;
-    padding: 1.5rem;
-}
-
-.employee-details {
-    position: relative;
-    overflow: hidden;  /* Ensure content doesn't overflow */
-}
-
-.action-buttons {
-    position: relative;
-    right: 0;
-    top: 0;
-    margin-left: 1rem;
-    white-space: nowrap;  /* Keep buttons on same line */
-}
-</style>
 {% endblock %} 

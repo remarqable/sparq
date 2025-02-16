@@ -1,0 +1,20 @@
+{% for chat in chats %}
+<div class="message {% if chat.author_id == current_user.id %}sent{% else %}received{% endif %}" id="message-{{ chat.id }}">
+    <div class="message-content">{{ chat.content }}</div>
+    <div class="message-meta">
+        <span class="author">{{ chat.author.first_name }}</span>
+        <span class="time">{{ chat.created_at|timeago }}</span>
+        {% if chat.pinned %}
+        <i class="fas fa-thumbtack"></i>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+{% if has_more %}
+<div class="load-more-container text-center mb-3">
+    <button class="btn btn-link btn-sm" @click="loadMoreMessages('{{ oldest_id }}')">
+        <i class="fas fa-chevron-up me-1"></i>{{ _('Load more') }}
+    </button>
+</div>
+{% endif %} 

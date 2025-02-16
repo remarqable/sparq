@@ -20,7 +20,7 @@ from . import blueprint
 @login_required
 def hiring():
     return render_template(
-        "people-coming-soon.html",
+        "people-coming-soon-mobile.html",
         active_page="hiring",
         title="Hiring",
         module_home="people_bp.people_home",

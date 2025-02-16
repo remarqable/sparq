@@ -16,13 +16,13 @@ from flask_login import login_required
 from . import blueprint
 
 
-@blueprint.route("/onboarding")
+@blueprint.route("/timeoff")
 @login_required
-def onboarding():
-    """Onboarding page (coming soon)"""
+def timeoff():
+    """Time off page (coming soon)"""
     return render_template(
         "people-coming-soon-mobile.html",
-        active_page="onboarding",
-        title="Onboarding",
+        active_page="timeoff",
+        title="Time Off",
         module_home="people_bp.people_home",
     )

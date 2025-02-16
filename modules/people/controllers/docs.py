@@ -21,7 +21,7 @@ from . import blueprint
 def docs():
     """Docs page (coming soon)"""
     return render_template(
-        "people-coming-soon.html",
+        "people-coming-soon-mobile.html",
         active_page="docs",
         title="Docs",
         module_home="people_bp.people_home",

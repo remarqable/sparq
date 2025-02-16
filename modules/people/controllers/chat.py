@@ -32,7 +32,7 @@ def chat():
         db.session.commit()
 
     return render_template(
-        "chat/index.html",
+        "chat/index-desktop.html",
         active_page="chat",
         title="Company Chat",
         channels=channels,
@@ -60,7 +60,7 @@ def get_channel_messages(channel_name):
         total_messages = channel.messages.count()
         if total_messages == 0:
             return render_template(
-                "chat/partials/chat_list.html",
+                "chat/partials/chat-list-desktop.html",
                 chats=[],
                 current_user=current_user,
                 channel_description=channel.description,
@@ -89,7 +89,7 @@ def get_channel_messages(channel_name):
         db.session.commit()
         
         return render_template(
-            "chat/partials/chat_list.html",
+            "chat/partials/chat-list-desktop.html",
             chats=messages,
             current_user=current_user,
             channel_description=channel.description,
@@ -172,18 +172,19 @@ def create_chat():
         # Create or update message states for all users except the author
         users = User.query.filter(User.id != current_user.id).all()
         for user in users:
-            # Check if user already has a read state for this channel
-            existing_state = ChatMessageState.query.filter_by(
+            # Get or create read state for this user/channel
+            read_state = ChatMessageState.query.filter_by(
                 user_id=user.id,
                 channel_id=channel.id,
                 interaction_type=InteractionType.READ
             ).first()
             
-            if existing_state:
-                # Don't modify existing state - let the user's current read status remain
-                continue
+            if read_state:
+                # Update existing state to mark new message as unread
+                # Keep the last_read_message_id as is, which means this new message is unread
+                read_state.updated_at = db.func.now()
             else:
-                # Create new state only if one doesn't exist
+                # Create new state
                 state = ChatMessageState(
                     user_id=user.id,
                     message_id=chat.id,
@@ -193,10 +194,12 @@ def create_chat():
                 )
                 db.session.add(state)
         
-        db.session.commit()
-
-        # Debug: Log message creation
-        current_app.logger.info(f"New message created in {channel_name} by user {current_user.id}")
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Database error while creating chat: {str(e)}")
+            return "Database error occurred. Please try again.", 500
 
         # Emit two events:
         # 1. To users in the channel to refresh their messages

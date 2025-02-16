@@ -1,0 +1,55 @@
+{% extends "base-auth-mobile.html" %}
+
+{% block title %}{{ _("Login") }}{% endblock %}
+
+{% block content %}
+<div class="mobile-auth-card">
+    <div class="text-center mb-4">
+        <img src="{{ url_for('core_bp.static', filename='images/sparq-logo.png') }}" 
+             alt="SparqOne" 
+             class="mobile-logo">
+    </div>
+
+    <form method="POST" action="{{ url_for('core_bp.login') }}">
+        <div class="mobile-form-group">
+            <input type="email" 
+                   name="email" 
+                   class="mobile-form-control" 
+                   placeholder="{{ _('Email') }}"
+                   required 
+                   autocomplete="email"
+                   inputmode="email"
+                   value="sarah@allaboutpies.shop"
+                   >
+        </div>
+
+        <div class="mobile-form-group">
+            <input type="password" 
+                   name="password" 
+                   class="mobile-form-control" 
+                   placeholder="{{ _('Password') }}"
+                   required 
+                   autocomplete="current-password"
+                   value="password123">
+        </div>
+
+        <div class="mobile-checkbox">
+            <input type="checkbox" 
+                   name="remember" 
+                   id="remember">
+            <label for="remember">{{ _("Remember me") }}</label>
+        </div>
+
+        <button type="submit" class="mobile-btn">
+            {{ _("Login") }}
+        </button>
+
+        <div class="text-center mt-4">
+            <a href="#" 
+               class="text-decoration-none">
+                {{ _("Forgot password?") }}
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

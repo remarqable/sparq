@@ -20,7 +20,7 @@ from . import blueprint
 @login_required
 def scheduling():
     return render_template(
-        "people-coming-soon.html",
+        "people-coming-soon-mobile.html",
         active_page="scheduling",
         title="Shift Scheduling",
         module_home="people_bp.people_home",

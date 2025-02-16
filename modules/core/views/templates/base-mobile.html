@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %} - SparqOne</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#6c757d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SparqOne">
+    {% if g.cache_control %}
+    <meta http-equiv="Cache-Control" content="{{ g.cache_control }}">
+    <meta http-equiv="Pragma" content="{{ g.pragma }}">
+    <meta http-equiv="Expires" content="{{ g.expires }}">
+    {% endif %}
+    
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('core_bp.static', filename='css/base.css') }}">
+    
+    <style>
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --header-height: 3.5rem;
+            --footer-height: 4rem;
+            --module-color-rgb: {{ g.current_module.color_rgb|default('108, 117, 125') }};
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            padding-top: var(--safe-area-inset-top);
+            z-index: 1000;
+            background: transparent;
+            display: grid;
+            grid-template-columns: 44px 1fr 44px;
+            align-items: center;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .back-button {
+            color: var(--module-color, #0d6efd);
+            font-size: 1.75rem;
+            padding: 0.5rem;
+            margin: -0.5rem;
+            line-height: 1;
+            text-decoration: none;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .header-title .icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--module-color, #0d6efd);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title i {
+            color: white;
+            font-size: 1.125rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .mobile-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-top: calc(var(--header-height) + var(--safe-area-inset-top));
+            padding-bottom: calc(var(--footer-height) + var(--safe-area-inset-bottom));
+        }
+
+        /* Footer Navigation */
+        .mobile-footer {
+            height: var(--footer-height);
+            background: white;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: var(--safe-area-inset-bottom);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .footer-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            border: none;
+            background: none;
+        }
+
+        .footer-item i {
+            font-size: 1.25rem;
+        }
+
+        .footer-item.active {
+            color: var(--module-color, #6c757d);
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            position: fixed;
+            top: calc(var(--header-height) + var(--safe-area-inset-top));
+            left: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        .flash-message {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 0.5rem;
+            pointer-events: auto;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #ffffff;
+            }
+
+            .mobile-header {
+                background: transparent;
+            }
+
+            .mobile-footer {
+                background-color: #2d2d2d;
+            }
+
+            .mobile-header {
+                border-bottom-color: var(--module-color, #6c757d);
+            }
+
+            .mobile-footer {
+                border-top-color: rgba(255,255,255,0.1);
+            }
+
+            .footer-item {
+                color: #dee2e6;
+            }
+
+            .flash-message {
+                background-color: #2d2d2d;
+            }
+        }
+
+        .mobile-menu {
+            width: 280px;
+            margin-bottom: calc(var(--footer-height) + 1rem);
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+            padding: 0.75rem 0;
+        }
+
+        .menu-user-info {
+            padding: 0.5rem 1rem;
+        }
+
+        .menu-user-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-user-email {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        .mobile-menu .dropdown-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .mobile-menu .dropdown-item i {
+            width: 1.25rem;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .mobile-menu .dropdown-divider {
+            margin: 0.5rem 0;
+        }
+
+        .user-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: rgba(var(--module-color-rgb, 108, 117, 125), 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--module-color, #6c757d);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .mobile-menu {
+                background-color: #2d2d2d;
+                border-color: rgba(255,255,255,0.1);
+            }
+
+            .menu-user-email {
+                color: #dee2e6;
+            }
+
+            .mobile-menu .dropdown-item {
+                color: #fff;
+            }
+
+            .mobile-menu .dropdown-item:hover {
+                background-color: rgba(255,255,255,0.1);
+            }
+
+            .mobile-menu .dropdown-divider {
+                border-color: rgba(255,255,255,0.1);
+            }
+        }
+
+        /* Only show top bar on functions page */
+        body[data-page="functions"] .mobile-header {
+            display: flex;
+        }
+    </style>
+    {% block additional_styles %}{% endblock %}
+</head>
+<body class="{% block app_class %}{% endblock %}" 
+      style="--module-color: {{ g.current_module.color|default('#6c757d') }}">
+    {% block header %}{% endblock %}
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="mobile-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer Navigation -->
+    <nav class="mobile-footer">
+        <a href="{{ url_for('people_bp.dashboard') }}" 
+           class="footer-item {% if request.endpoint == 'people_bp.dashboard' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('people_bp.functions') }}" 
+           class="footer-item {% if request.endpoint == 'people_bp.functions' %}active{% endif %}"
+           onclick="if (document.startViewTransition && !this.classList.contains('active')) { document.documentElement.classList.add('back-transition'); }">
+            <i class="fas fa-th-large"></i>
+            <span>Functions</span>
+        </a>
+        <a href="{{ url_for('people_bp.chat') }}" 
+           class="footer-item {% if request.endpoint == 'people_bp.chat' %}active{% endif %}">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="{{ url_for('people_bp.profile') }}" 
+           class="footer-item {% if request.endpoint == 'people_bp.profile' %}active{% endif %}">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+        <button class="footer-item" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="user-avatar">{{ current_user.initials }}</div>
+            <span>{{ _("Menu") }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end mobile-menu">
+            <li class="dropdown-header">
+                <div class="menu-user-info">
+                    <div class="menu-user-name">{{ current_user.full_name }}</div>
+                    <div class="menu-user-email">{{ current_user.email }}</div>
+                </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="{{ url_for('core_bp.settings') }}">
+                    <i class="fas fa-cog"></i>
+                    <span>{{ _("Settings") }}</span>
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item text-danger" href="{{ url_for('core_bp.logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>{{ _("Sign Out") }}</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+    
+    <script>
+        // Auto-dismiss flash messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.flash-message');
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateY(-100%)';
+                    setTimeout(() => message.remove(), 300);
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>

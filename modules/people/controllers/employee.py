@@ -35,12 +35,20 @@ from . import blueprint
 logger = logging.getLogger(__name__)
 
 
+def is_mobile():
+    """Check if the current request is from a mobile device"""
+    user_agent = request.user_agent.string.lower()
+    mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'webos']
+    return any(keyword in user_agent for keyword in mobile_keywords)
+
+
 @blueprint.route("/")
 @login_required
 def people_home():
     """People dashboard page"""
+    template = "dashboard/index-mobile.html" if is_mobile() else "dashboard/index-desktop.html"
     return render_template(
-        "dashboard/index.html",
+        template,
         title=g.current_module["name"],
         module_name=g.current_module["name"],
         module_icon=g.current_module["icon_class"],
@@ -55,8 +63,11 @@ def people_home():
 @login_required
 def dashboard():
     """People dashboard page"""
+    template = "dashboard/index-mobile.html" if is_mobile() else "dashboard/index-desktop.html"
     return render_template(
-        "dashboard/index.html", active_page="dashboard", module_home="people_bp.people_home"
+        template, 
+        active_page="dashboard", 
+        module_home="people_bp.people_home"
     )
 
 
@@ -65,8 +76,9 @@ def dashboard():
 def employees():
     """Employees list page"""
     users = User.query.join(Employee).filter(User.email != "admin").all()
+    template = "employees/employees-mobile.html" if is_mobile() else "employees/index-desktop.html"
     return render_template(
-        "employees/index.html",
+        template,
         active_page="employees",
         users=users,
         module_home="people_bp.people_home",
@@ -82,7 +94,7 @@ def new_employee():
     potential_managers = Employee.query.join(User).order_by(User.first_name).all()
 
     return render_template(
-        "employees/form.html",
+        "employees/form-desktop.html",
         title="New Employee",
         employee=None,
         employee_types=EmployeeType,
@@ -157,7 +169,7 @@ def edit_employee(employee_id):
         admin_count = User.query.filter(User.groups.any(name="ADMIN")).count()
 
     return render_template(
-        "employees/form.html",
+        "employees/form-desktop.html",
         title="Edit Employee",
         employee=employee,
         employee_types=EmployeeType,
@@ -314,3 +326,27 @@ def update_user_groups(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)})
+
+
+@blueprint.route("/functions")
+@login_required
+def functions():
+    """Functions page"""
+    template = "functions/index-mobile.html" if is_mobile() else "functions/index-desktop.html"
+    return render_template(
+        template,
+        active_page="functions",
+        module_home="people_bp.people_home"
+    )
+
+
+@blueprint.route("/profile")
+@login_required
+def profile():
+    """User profile page"""
+    template = "profile/profile-mobile.html" if is_mobile() else "profile/index-desktop.html"
+    return render_template(
+        template,
+        active_page="profile",
+        module_home="people_bp.people_home"
+    )

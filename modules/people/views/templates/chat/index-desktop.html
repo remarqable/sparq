@@ -461,23 +461,14 @@ document.addEventListener('alpine:init', () => {
                     this.channelStates[id].name === data.channel
                 );
                 
-                if (channelId) {
-                    // If user is not the author of the message
-                    if (data.author_id !== this.currentUserId) {
-                        if (data.channel === this.currentChannel) {
-                            // User is in the channel where message was created
-                            // Reload messages and mark as read
-                            this.loadChannelMessages(this.currentChannel);
-                            fetch(`/people/chat/channels/${data.channel}/mark_read`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' }
-                            }).catch(error => {
-                                console.error('Error marking message as read:', error);
-                            });
-                        } else {
-                            // User is not in the channel, increment unread count
-                            this.updateChannelUnreadCount(channelId, true);
-                        }
+                if (channelId && data.author_id !== this.currentUserId) {
+                    if (data.channel === this.currentChannel) {
+                        // User is in the channel where message was created
+                        // Just reload messages - don't mark as read yet
+                        this.loadChannelMessages(this.currentChannel);
+                    } else {
+                        // User is not in the channel, increment unread count
+                        this.updateChannelUnreadCount(channelId, true, 1);
                     }
                 }
             });
@@ -643,7 +634,7 @@ document.addEventListener('alpine:init', () => {
                 this.channelStates[channelId] = { 
                     unreadCount: 0,
                     description: '',
-                    name: '' // Add name to state for easier lookup
+                    name: ''
                 };
             }
             

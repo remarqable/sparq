@@ -1,0 +1,181 @@
+{% extends "base-mobile.html" %}
+
+{% block title %}{{ _("Profile") }}{% endblock %}
+
+{% block additional_styles %}
+<style>
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 6rem;
+        height: 6rem;
+        border-radius: 50%;
+        background: rgba(var(--module-color-rgb, 108, 117, 125), 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+        color: var(--module-color, #6c757d);
+    }
+
+    .profile-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-title {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .profile-section {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: var(--module-color, #6c757d);
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+    }
+
+    .profile-actions {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: none;
+        border: none;
+        border-radius: 0.75rem;
+        color: inherit;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .action-button i {
+        width: 1.5rem;
+        color: var(--module-color, #6c757d);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .profile-section {
+            background: #2d2d2d;
+        }
+
+        .profile-title,
+        .info-label {
+            color: #dee2e6;
+        }
+
+        .info-item {
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="profile-avatar">
+        {{ current_user.initials }}
+    </div>
+    <h1 class="profile-name">{{ current_user.full_name }}</h1>
+    <div class="profile-title">{{ current_user.title }}</div>
+</div>
+
+<div class="profile-section">
+    <div class="section-header">
+        <i class="fas fa-user"></i>
+        <h2 class="section-title">{{ _("Personal Information") }}</h2>
+    </div>
+    <div class="info-item">
+        <div class="info-label">{{ _("Email") }}</div>
+        <div class="info-value">{{ current_user.email }}</div>
+    </div>
+    <div class="info-item">
+        <div class="info-label">{{ _("Phone") }}</div>
+        <div class="info-value">{{ current_user.phone }}</div>
+    </div>
+    <div class="info-item">
+        <div class="info-label">{{ _("Department") }}</div>
+        <div class="info-value">{{ current_user.department }}</div>
+    </div>
+</div>
+
+<div class="profile-section">
+    <div class="section-header">
+        <i class="fas fa-cog"></i>
+        <h2 class="section-title">{{ _("Settings & Privacy") }}</h2>
+    </div>
+    <div class="profile-actions">
+        <button class="action-button">
+            <i class="fas fa-lock"></i>
+            <span>{{ _("Change Password") }}</span>
+        </button>
+        <button class="action-button">
+            <i class="fas fa-bell"></i>
+            <span>{{ _("Notification Settings") }}</span>
+        </button>
+        <button class="action-button">
+            <i class="fas fa-moon"></i>
+            <span>{{ _("Dark Mode") }}</span>
+        </button>
+    </div>
+</div>
+
+<div class="profile-section">
+    <div class="section-header">
+        <i class="fas fa-sign-out-alt"></i>
+        <h2 class="section-title">{{ _("Account") }}</h2>
+    </div>
+    <div class="profile-actions">
+        <button class="action-button text-danger">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>{{ _("Sign Out") }}</span>
+        </button>
+    </div>
+</div>
+{% endblock %} 

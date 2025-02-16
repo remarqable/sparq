@@ -1,8 +1,11 @@
-{% extends "people-base.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ employee.user.first_name }} {{ employee.user.last_name }} - {{ _("Team Member") }}{% endblock %}
 
-{% block people_content %}
+{% block app_class %}people-app{% endblock %}
+
+{% block additional_styles %}
+<link rel="stylesheet" href="{{ url_for('people_bp.static', filename='css/people.css') }}">
 <style>
     /* Keep the same styles as admin-view for consistency */
     .employee-actions .btn.action-btn {
@@ -88,103 +91,110 @@
         margin-bottom: 0;
     }
 </style>
+{% endblock %}
 
-<div class="content-card">
-    <div class="d-flex justify-content-between align-items-start mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item">
-                    <a href="{{ url_for('people_bp.employees') }}">{{ _("Employees") }}</a>
-                </li>
-                <li class="breadcrumb-item active">
-                    {{ employee.user.first_name }} {{ employee.user.last_name }}
-                </li>
-            </ol>
-        </nav>
-    </div>
+{% block content %}
+<div class="d-flex">
+    {% include 'people_nav.html' with context %}
+    <div class="content-wrapper flex-grow-1">
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('people_bp.employees') }}">{{ _("Employees") }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ employee.user.first_name }} {{ employee.user.last_name }}
+                        </li>
+                    </ol>
+                </nav>
+            </div>
 
-    <div class="d-flex justify-content-between align-items-start employee-header">
-        <div>
-            <h1 class="employee-name">
-                {{ employee.user.first_name }} {{ employee.user.last_name }}
-            </h1>
-            <p class="employee-position">
-                {{ employee.position or _("N/A") }}
-            </p>
-        </div>
-    </div>
+            <div class="d-flex justify-content-between align-items-start employee-header">
+                <div>
+                    <h1 class="employee-name">
+                        {{ employee.user.first_name }} {{ employee.user.last_name }}
+                    </h1>
+                    <p class="employee-position">
+                        {{ employee.position or _("N/A") }}
+                    </p>
+                </div>
+            </div>
 
-    <div class="contact-info d-flex gap-4">
-        <div class="contact-item">
-            <i class="fas fa-phone text-muted"></i>
-            <span>{{ employee.phone or _('Not provided') }}</span>
-        </div>
-        <div class="contact-item">
-            <i class="fas fa-envelope text-muted"></i>
-            <span>{{ employee.user.email }}</span>
-        </div>
-    </div>
+            <div class="contact-info d-flex gap-4">
+                <div class="contact-item">
+                    <i class="fas fa-phone text-muted"></i>
+                    <span>{{ employee.phone or _('Not provided') }}</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope text-muted"></i>
+                    <span>{{ employee.user.email }}</span>
+                </div>
+            </div>
 
-    <div class="detail-tabs">
-        <button class="tab-btn active" data-tab="main">{{ _("Main") }}</button>
-    </div>
+            <div class="detail-tabs">
+                <button class="tab-btn active" data-tab="main">{{ _("Main") }}</button>
+            </div>
 
-    <div class="detail-sections">
-        <div class="tab-content active" id="main-tab">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="info-section">
-                        <h3>{{ _("Employment") }}</h3>
-                        <div class="info-item">
-                            <label>{{ _("Department") }}</label>
-                            <div>{{ employee.department or _('Not set') }}</div>
-                        </div>
-                        <div class="info-item">
-                            <label>{{ _("Position") }}</label>
-                            <div>{{ employee.position or _('Not set') }}</div>
-                        </div>
-                        {% if employee.manager %}
-                        <div class="info-item">
-                            <label>{{ _("Reports to") }}</label>
-                            <div>
-                                <a href="{{ url_for('people_bp.employee_detail', employee_id=employee.manager.id) }}" class="text-decoration-none">
-                                    {{ employee.manager.user.first_name }} {{ employee.manager.user.last_name }}
-                                </a>
+            <div class="detail-sections">
+                <div class="tab-content active" id="main-tab">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-section">
+                                <h3>{{ _("Employment") }}</h3>
+                                <div class="info-item">
+                                    <label>{{ _("Department") }}</label>
+                                    <div>{{ employee.department or _('Not set') }}</div>
+                                </div>
+                                <div class="info-item">
+                                    <label>{{ _("Position") }}</label>
+                                    <div>{{ employee.position or _('Not set') }}</div>
+                                </div>
+                                {% if employee.manager %}
+                                <div class="info-item">
+                                    <label>{{ _("Reports to") }}</label>
+                                    <div>
+                                        <a href="{{ url_for('people_bp.employee_detail', employee_id=employee.manager.id) }}" class="text-decoration-none">
+                                            {{ employee.manager.user.first_name }} {{ employee.manager.user.last_name }}
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
-                        {% endif %}
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    {% if employee.reports %}
-                    <div class="info-section">
-                        <h3>{{ _("Team Members") }}</h3>
-                        {% for report in employee.reports %}
-                        <div class="mb-2">
-                            <a href="{{ url_for('people_bp.employee_detail', employee_id=report.id) }}" class="text-decoration-none">
-                                {{ report.user.first_name }} {{ report.user.last_name }}
-                            </a>
-                            <div class="text-muted small">{{ report.position or _('N/A') }}</div>
+                        <div class="col-md-4">
+                            {% if employee.reports %}
+                            <div class="info-section">
+                                <h3>{{ _("Team Members") }}</h3>
+                                {% for report in employee.reports %}
+                                <div class="mb-2">
+                                    <a href="{{ url_for('people_bp.employee_detail', employee_id=report.id) }}" class="text-decoration-none">
+                                        {{ report.user.first_name }} {{ report.user.last_name }}
+                                    </a>
+                                    <div class="text-muted small">{{ report.position or _('N/A') }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
 
-                <div class="col-md-4">
-                    <div class="info-section">
-                        <h3>{{ _("Office") }}</h3>
-                        <div class="info-item">
-                            <label>{{ _("Location") }}</label>
-                            <div>{{ employee.location or _('Not set') }}</div>
+                        <div class="col-md-4">
+                            <div class="info-section">
+                                <h3>{{ _("Office") }}</h3>
+                                <div class="info-item">
+                                    <label>{{ _("Location") }}</label>
+                                    <div>{{ employee.location or _('Not set') }}</div>
+                                </div>
+                                {% if employee.work_schedule %}
+                                <div class="info-item">
+                                    <label>{{ _("Work Schedule") }}</label>
+                                    <div>{{ employee.work_schedule }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                        {% if employee.work_schedule %}
-                        <div class="info-item">
-                            <label>{{ _("Work Schedule") }}</label>
-                            <div>{{ employee.work_schedule }}</div>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -5,14 +5,11 @@
 {% block app_class %}people-app{% endblock %}
 
 {% block content %}
-<div class="people-layout">
-    {% include 'people_nav.html' with context %}
-    <main class="main-content">
-        <div class="coming-soon">
-            <i class="fas fa-rocket"></i>
-            <h2>Hiring</h2>
-            <p>We're working on something exciting! Check back later.</p>
-        </div>
-    </main>
+<div class="content-card">
+    <div class="coming-soon">
+        <i class="fas fa-rocket"></i>
+        <h2>Hiring</h2>
+        <p>We're working on something exciting! Check back later.</p>
+    </div>
 </div>
 {% endblock %} 

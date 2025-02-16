@@ -45,6 +45,15 @@ blueprint = Blueprint(
 )
 
 
+@blueprint.before_request
+def before_request():
+    """Set cache control headers to prevent caching"""
+    if request.endpoint != 'static':
+        g.cache_control = 'no-cache, no-store, must-revalidate'
+        g.pragma = 'no-cache'
+        g.expires = '0'
+
+
 def admin_required(f):
     """Decorator to require admin access for a route"""
 
@@ -61,15 +70,20 @@ def admin_required(f):
 @blueprint.route("/")
 @login_required
 def index():
-    """Redirect root to people dashboard"""
-    return redirect(url_for("people_bp.people_home"))
+    """Redirect root to functions page"""
+    return redirect(url_for("people_bp.functions"))
 
+def is_mobile():
+    """Check if the current request is from a mobile device"""
+    user_agent = request.user_agent.string.lower()
+    mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'webos']
+    return any(keyword in user_agent for keyword in mobile_keywords)
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():
     # Redirect if user is already logged in
     if current_user.is_authenticated:
-        return redirect(url_for("people_bp.people_home"))
+        return redirect(url_for("people_bp.functions" if is_mobile() else "people_bp.people_home"))
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -80,9 +94,9 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=remember)
             next_page = request.args.get("next")
-            # Ensure the next page is safe and default to people dashboard
+            # Ensure the next page is safe and default to appropriate page based on device
             if not next_page or not next_page.startswith("/"):
-                next_page = url_for("people_bp.people_home")
+                next_page = url_for("people_bp.functions" if is_mobile() else "people_bp.people_home")
             return redirect(next_page)
 
         flash("Invalid email or password", "error")
@@ -90,7 +104,7 @@ def login():
     return render_template("login.html")
 
 
-@blueprint.route("/logout")
+@blueprint.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
     logout_user()

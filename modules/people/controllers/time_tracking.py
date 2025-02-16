@@ -21,8 +21,8 @@ from . import blueprint
 def time_tracking():
     """Time tracking page (coming soon)"""
     return render_template(
-        "people-coming-soon.html",
-        active_page="docs",
-        title="Docs",
+        "people-coming-soon-mobile.html",
+        active_page="time_tracking",
+        title="Time Tracking",
         module_home="people_bp.people_home",
     )

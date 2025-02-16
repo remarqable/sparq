@@ -18,7 +18,7 @@ from . import blueprint
 @login_required
 def forms():
     return render_template(
-        "people-coming-soon.html",
+        "people-coming-soon-mobile.html",
         active_page="forms",
         title="Forms",
         module_home="people_bp.people_home",
