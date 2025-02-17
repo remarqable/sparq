@@ -2,8 +2,8 @@ const CACHE_NAME = 'sparq-cache-v1';
 const STATIC_ASSETS = [
     '/',
     '/assets/css/base.css',
-    '/assets/css/auth.css',
-    '/assets/css/apps.css',
+    '/assets/css/base.css',
+    '/assets/css/base.css',
     '/assets/images/sparq-logo.png',
     '/assets/images/icon-192x192.png',
     '/assets/images/icon-512x512.png',

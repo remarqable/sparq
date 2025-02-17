@@ -101,7 +101,7 @@ def login():
 
         flash("Invalid email or password", "error")
 
-    return render_template("login.html")
+    return render_template("login-desktop.html")
 
 
 @blueprint.route("/logout", methods=["GET", "POST"])

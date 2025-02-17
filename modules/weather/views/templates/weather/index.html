@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}Weather{% endblock %}
 
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-card weather-card" 
+<div class="bg-white p-4 rounded shadow-sm weather-card" 
      x-data="{
          state: 'loading',
          city: 'Minneapolis',

@@ -1,233 +1,22 @@
-/* Breadcrumb */
-.breadcrumb {
-    padding: 0.5rem 0;
-    margin-bottom: 1.5rem;
-    background: transparent;
-}
+/* Essential styles for app manager */
 
-.breadcrumb-item a {
-    color: #6c757d;
-    text-decoration: none;
-}
-
-.breadcrumb-item a:hover {
-    color: var(--bs-primary);
-}
-
-.breadcrumb-item i {
-    margin-right: 0.5rem;
-}
-
-.breadcrumb-item.active {
-    color: #495057;
-}
-
+/* Custom breadcrumb separator */
 .breadcrumb-item + .breadcrumb-item::before {
     content: "›";
-    color: #6c757d;
 }
 
-/* Base styles for app manager */
-.settings-header {
-    margin-bottom: 2rem;
-}
-
-.settings-header h2 {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #212529;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.settings-header h2 i {
-    font-size: 1.25rem;
-}
-
-.settings-header p {
-    color: #6c757d;
-    margin: 0;
-}
-
-/* Grid Layout - Mobile First */
-.apps-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 1rem 0;
-    width: 100%;
-}
-
-/* App Cards */
-.app-card {
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 0.5rem;
-    padding: 1.25rem;
-    width: 100%;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-}
-
-/* Card Content */
-.app-card-content {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-/* App Details */
-.app-details {
-    flex: 1;
-    padding: 0 0.5rem;  /* Add horizontal padding */
-    min-width: 0;       /* Prevent text overflow */
-}
-
-.app-manager-header {
-    margin-bottom: 0.5rem;
-}
-
-.app-manager-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.app-version {
+/* App version badge */
+.app-version-badge {
     font-size: 0.75rem;
-    color: #6c757d;
-    font-weight: normal;
-}
-
-.short-desc {
-    font-size: 0.875rem;
-    color: #495057;
-    margin: 0.25rem 0;
-}
-
-.long-desc {
-    font-size: 0.8125rem;
-    color: #6c757d;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* Footer Controls */
-.app-footer {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    margin-top: auto;
-    width: 100%;
-    position: relative;
-}
-
-.footer-controls {
-    position: absolute;
-    right: 0;
-    top: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.form-check.form-switch {
-    margin: 0;
-    padding: 0;
-}
-
-.form-check-input {
-    margin: 0;
-    cursor: pointer;
-}
-
-.btn-icon {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #dc3545;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-.btn-icon:hover {
-    opacity: 0.9;
-}
-
-.fa-xs {
-    font-size: 0.6rem;
-}
-
-/* App Card Header */
-.app-manager-header {
-    margin-bottom: 1rem;
-}
-
-.app-manager-header h3 {
-    display: flex;
-    align-items: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #212529;
-    margin: 0;
-}
-
-.app-manager-header .app-version {
-    font-size: 0.75rem;
-    color: #6c757d;
-    font-weight: normal;
-    margin-left: 0.75rem;
     padding: 0.125rem 0.375rem;
-    background: #f8f9fa;
+    background: var(--bs-gray-100);
     border-radius: 0.25rem;
 }
 
-/* Remove any margins from Bootstrap */
-.form-check-check {
-    margin: 0 !important;
-}
-
-/* Controls Section */
-.app-controls {
-    border-top: 1px solid #e9ecef;
-    padding-top: 1rem;
-    position: relative;
-    height: 40px;
-}
-
-.controls-wrapper {
-    position: absolute;
-    right: 0;
-    top: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-/* Override any Bootstrap margins */
-.form-check-check {
-    margin: 0 !important;
-}
-
-/* Clean up duplicate/unused styles */
-.app-controls,
-.controls-wrapper,
-.form-check-check {
-    /* Remove these unused classes */
-    display: none;
-}
-
-/* App Icon */
+/* App manager icon */
 .app-manager-icon {
-    flex-shrink: 0;
     width: 48px;
     height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .app-manager-icon i {
@@ -235,27 +24,22 @@
     opacity: 0.9;
 }
 
-/* Override hover effect from apps.css */
-.content-card .app-card {
-    transition: none;
+/* App manager grid */
+.app-manager-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
 }
 
-.content-card .app-card:hover {
-    transform: none;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-}
-
-/* Adjust trash icon size */
-.btn-icon i.fa-xs {
-    font-size: 1rem;  /* Make trash icon smaller */
-}
-
-/* Desktop Styles */
-@media (min-width: 769px) {
-    .apps-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2rem;
-        padding: 0.5rem 0;
+@media (min-width: 768px) {
+    .app-manager-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     }
-    /* Rest of desktop styles remain the same... */
+}
+
+/* Toast animations */
+.alert.hiding {
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: all 0.3s ease-out;
 } 

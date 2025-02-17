@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ _("Page Not Found") }}{% endblock %}
 
 {% block content %}
 <div class="error-container">
     <div class="error-content">
-        <img src="{{ url_for('core_bp.static', filename='images/sparq-logo.png') }}" alt="SparqOne" class="error-logo">
+        <img src="{{ url_for('core_bp.static', filename='images/sparq-logo.png') }}" alt="sparQ" class="error-logo">
         <h1>{{ _("Oops! Page Not Found") }}</h1>
         <p>{{ _("The page you're looking for doesn't exist or has been moved.") }}</p>
         <div class="error-actions">

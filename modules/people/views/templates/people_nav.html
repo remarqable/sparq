@@ -1,70 +1,80 @@
-<nav class="side-nav">
-    <ul class="nav-menu">
-        <li class="nav-item">
+<nav class="side-nav bg-white rounded shadow-sm">
+    <ul class="nav-menu list-unstyled p-0 m-0">
+        <li class="nav-item mb-1">
             <a href="{{ url_for('people_bp.dashboard') }}" 
-               class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
-                <i class="fas fa-chart-line"></i>
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'dashboard' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-chart-line" style="color: var(--module-color)"></i>
                 {{ _("Dashboard") }}
             </a>
         </li>
-
-        <li class="nav-item">
+        <li class="nav-item mb-1">
             <a href="{{ url_for('people_bp.chat') }}" 
-               class="nav-link {% if active_page == 'chat' %}active{% endif %}">
-                <i class="fas fa-comments"></i>
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'chat' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-comments" style="color: var(--bs-cyan)"></i>
                 {{ _("Chat") }}
             </a>
         </li>
-        <li class="nav-item">
-            <a href="{{ url_for('people_bp.hiring') }}" class="nav-link {% if active_page == 'hiring' %}active{% endif %}">
-                <i class="fas fa-user-plus"></i>
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('people_bp.hiring') }}" 
+               class="d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'hiring' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-handshake" style="color: var(--bs-purple)"></i>
                 {{ _("Hiring") }}
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item mb-1">
             <a href="{{ url_for('people_bp.onboarding') }}" 
-               class="nav-link {% if active_page == 'onboarding' %}active{% endif %}">
-                <i class="fas fa-handshake"></i>
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'onboarding' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-user-plus" style="color: var(--bs-success)"></i>
                 {{ _("Onboarding") }}
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item mb-1">
             <a href="{{ url_for('people_bp.employees') }}" 
-               class="nav-link {% if active_page == 'employees' %}active{% endif %}">
-                <i class="fas fa-users"></i>
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'employees' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-users" style="color: var(--module-color)"></i>
                 {{ _("Employees") }}
             </a>
-        </li>
+        </li>   
         <li class="nav-item">
-            <a href="{{ url_for('people_bp.time_tracking') }}" class="nav-link {% if active_page == 'time_tracking' %}active{% endif %}">
-                <i class="fas fa-clock"></i>
+            <a href="{{ url_for('people_bp.timeoff') }}" 
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'timeoff' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-umbrella-beach" style="color: var(--bs-danger)"></i>
+                {{ _("Time Off") }}
+            </a>
+        </li>   
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('people_bp.time_tracking') }}" 
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'time_tracking' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-clock" style="color: var(--bs-warning)"></i>
                 {{ _("Time Tracking") }}
             </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('people_bp.scheduling') }}" class="nav-link {% if active_page == 'scheduling' %}active{% endif %}">
-                <i class="fas fa-calendar-alt"></i>
-                {{ _("Shift Scheduling") }}
+        </li>  
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('people_bp.scheduling') }}" 
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'scheduling' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-calendar-alt" style="color: var(--bs-info)"></i>
+                {{ _("Scheduling") }}
             </a>
         </li>
-        <li class="nav-item">
-            <a href="{{ url_for('people_bp.forms') }}" class="nav-link {% if active_page == 'forms' %}active{% endif %}">
-                <i class="fas fa-file-alt"></i>
-                {{ _("Forms") }}
-            </a>
-        </li>
-        <li class="nav-item">
+        <li class="nav-item mb-1">
             <a href="{{ url_for('people_bp.docs') }}" 
-               class="nav-link {% if active_page == 'docs' %}active{% endif %}">
-                <i class="fas fa-folder"></i>
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'documents' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-file-alt" style="color: var(--bs-teal)"></i>
                 {{ _("Documents") }}
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item mb-1">
             <a href="{{ url_for('people_bp.knowledge') }}" 
-               class="nav-link {% if active_page == 'knowledge' %}active{% endif %}">
-                <i class="fas fa-book"></i>
-                {{ _("Knowledge Base") }}
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'knowledge' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-book" style="color: var(--bs-pink)"></i>
+                {{ _("Knowledge") }}
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('people_bp.reimbursement') }}" 
+               class=" d-flex align-items-center gap-3 text-nowrap text-body text-decoration-none p-3 rounded {% if active_page == 'reimbursement' %}active bg-light fw-medium{% endif %}">
+                <i class="fas fa-receipt" style="color: var(--bs-teal)"></i>
+                {{ _("Reimbursement") }}
             </a>
         </li>
     </ul>

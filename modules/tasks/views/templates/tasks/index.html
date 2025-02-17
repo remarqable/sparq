@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ _("Tasks") }}{% endblock %}
 
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-card tasks-container">
+<div class="bg-white p-4 rounded shadow-sm tasks-container">
     <div class="tasks-header">
         <h2>{{ _("Tasks") }}</h2>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
@@ -79,7 +79,7 @@
             <form action="{{ url_for('tasks_bp.add_task') }}" method="POST">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="taskName" class="form-label">{{ _("Task Name") }}</label>
+                        <label for="taskName" class="fw-medium text-body-secondary">{{ _("Task Name") }}</label>
                         <input type="text" class="form-control" id="taskName" name="name" required>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
             <form id="editTaskForm" method="POST">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="editTaskName" class="form-label">{{ _("Task Name") }}</label>
+                        <label for="editTaskName" class="fw-medium text-body-secondary">{{ _("Task Name") }}</label>
                         <input type="text" class="form-control" id="editTaskName" name="name" required>
                     </div>
                 </div>

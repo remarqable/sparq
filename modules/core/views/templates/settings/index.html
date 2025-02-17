@@ -1,28 +1,30 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ _("Settings") }}{% endblock %}
 
 {% block app_class %}settings-app{% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="settings-header">
-        <h2><i class="fas fa-cog"></i> {{ _("Settings") }}</h2>
-        <p class="text-muted">{{ _("Configure your account and system preferences") }}</p>
+<div class="bg-white p-4 rounded shadow-sm">
+    <div class="mb-4">
+        <h2 class="d-flex align-items-center gap-2 mb-2">
+            <i class="fas fa-cog text-primary"></i> {{ _("Settings") }}
+        </h2>
+        <p class="text-muted mb-0">{{ _("Configure your account and system preferences") }}</p>
     </div>
 
     <div class="settings-grid">
         <!-- Left Column: User Settings -->
-        <div class="settings-column">
+        <div class="d-flex flex-column gap-4">
             <h3>{{ _("User Settings") }}</h3>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-language"></i> {{ _("Language Settings") }}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4">
+                    <i class="fas fa-language text-primary me-2"></i> {{ _("Language Settings") }}
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form id="languageForm" class="mb-3">
                         <div class="mb-3">
-                            <label for="language" class="form-label">{{ _("Interface Language") }}</label>
+                            <label for="language" class="fw-medium text-body-secondary">{{ _("Interface Language") }}</label>
                             <select class="form-select" id="language" name="language">
                                 {% for code, name in languages.items() %}
                                 <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>
@@ -36,11 +38,11 @@
             </div>
             
             <!-- Profile Settings Card -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-user"></i> {{ _("Profile Settings") }}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4">
+                    <i class="fas fa-user text-primary me-2"></i> {{ _("Profile Settings") }}
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <p>{{ _("Update your personal information and preferences") }}</p>
                     <a href="{{ url_for('people_bp.edit_employee', employee_id=current_user.employee_profile.id) }}" class="btn btn-primary">
                         {{ _("Edit Profile") }}
@@ -51,13 +53,13 @@
 
         <!-- Right Column: System Settings -->
         {% if current_user.is_admin %}
-        <div class="settings-column">
+        <div class="d-flex flex-column gap-4">
             <h3>{{ _("System Settings") }}</h3>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-puzzle-piece"></i> {{ _("App Manager") }}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4">
+                    <i class="fas fa-puzzle-piece text-primary me-2"></i> {{ _("App Manager") }}
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <p>{{ _("Manage installed applications and modules") }}</p>
                     <a href="{{ url_for('core_bp.manage_apps') }}" class="btn btn-primary">
                         {{ _("Manage Apps") }}
@@ -65,11 +67,11 @@
                 </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-users"></i> {{ _("Group Management") }}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4">
+                    <i class="fas fa-users text-primary me-2"></i> {{ _("Group Management") }}
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <p>{{ _("Manage user group memberships and permissions") }}</p>
                     <a href="{{ url_for('core_bp.manage_groups') }}" class="btn btn-primary">
                         {{ _("Manage Groups") }}
@@ -82,41 +84,12 @@
 </div>
 
 <style>
+/* Only keep the grid layout which can't be easily done with Bootstrap */
 .settings-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
     margin-top: 2rem;
-}
-
-.settings-column {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.settings-header {
-    margin-bottom: 2rem;
-}
-
-.card {
-    border: none;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.card-header {
-    background-color: transparent;
-    border-bottom: none;
-    padding: 1.5rem;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-.card i {
-    margin-right: 0.5rem;
-    color: var(--bs-primary);
 }
 
 @media (max-width: 768px) {

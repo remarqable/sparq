@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ _(title) }}{% endblock %}
 
@@ -13,7 +13,7 @@
     {% include 'people_nav.html' with context %}
     
     <div class="content-wrapper flex-grow-1">
-        <div class="content-card">
+        <div class="bg-white p-4 rounded shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h2>{{ _(title) }}</h2>
                 <a href="{{ url_for('people_bp.employee_detail', employee_id=employee.id) if employee else url_for('people_bp.employees') }}" 
@@ -28,22 +28,22 @@
                         <div class="col-md-6">
                             <h3>{{ _("User Information") }}</h3>
                             <div class="mb-3">
-                                <label for="email" class="form-label">{{ _("Email") }} *</label>
+                                <label for="email" class="fw-medium text-body-secondary">{{ _("Email") }} *</label>
                                 <input type="email" class="form-control" id="email" name="email" 
                                        value="{{ employee.user.email if employee else '' }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="first_name" class="form-label">{{ _("First Name") }} *</label>
+                                <label for="first_name" class="fw-medium text-body-secondary">{{ _("First Name") }} *</label>
                                 <input type="text" class="form-control" id="first_name" name="first_name" 
                                        value="{{ employee.user.first_name if employee else '' }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="last_name" class="form-label">{{ _("Last Name") }} *</label>
+                                <label for="last_name" class="fw-medium text-body-secondary">{{ _("Last Name") }} *</label>
                                 <input type="text" class="form-control" id="last_name" name="last_name" 
                                        value="{{ employee.user.last_name if employee else '' }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">{{ _("Password") }} {{ '' if employee else '*' }}</label>
+                                <label for="password" class="fw-medium text-body-secondary">{{ _("Password") }} {{ '' if employee else '*' }}</label>
                                 <input type="password" class="form-control" id="password" name="password" 
                                        {{ '' if employee else 'required' }}>
                                 {% if employee %}
@@ -71,17 +71,17 @@
                             <h3>{{ _("Employee Information") }}</h3>
                             {% if current_user.is_admin %}
                             <div class="mb-3">
-                                <label for="department" class="form-label">{{ _("Department") }}</label>
+                                <label for="department" class="fw-medium text-body-secondary">{{ _("Department") }}</label>
                                 <input type="text" class="form-control" id="department" name="department" 
                                        value="{{ employee.department if employee else '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="position" class="form-label">{{ _("Position") }}</label>
+                                <label for="position" class="fw-medium text-body-secondary">{{ _("Position") }}</label>
                                 <input type="text" class="form-control" id="position" name="position" 
                                        value="{{ employee.position if employee else '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="manager_id" class="form-label">{{ _("Manager") }}</label>
+                                <label for="manager_id" class="fw-medium text-body-secondary">{{ _("Manager") }}</label>
                                 <select class="form-select" id="manager_id" name="manager_id">
                                     <option value="">{{ _("Select Manager") }}</option>
                                     {% for potential_manager in potential_managers %}
@@ -93,7 +93,7 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="type" class="form-label">{{ _("Employee Type") }}</label>
+                                <label for="type" class="fw-medium text-body-secondary">{{ _("Employee Type") }}</label>
                                 <select class="form-select" id="type" name="type">
                                     {% for type in employee_types %}
                                     <option value="{{ type.name }}" 
@@ -105,45 +105,45 @@
                             </div>
                             {% endif %}
                             <div class="mb-3">
-                                <label for="phone" class="form-label">{{ _("Phone") }}</label>
+                                <label for="phone" class="fw-medium text-body-secondary">{{ _("Phone") }}</label>
                                 <input type="tel" class="form-control" id="phone" name="phone" 
                                        value="{{ employee.phone if employee else '' }}">
                             </div>
                             {% if current_user.is_admin %}
                             <div class="mb-3">
-                                <label for="start_date" class="form-label">{{ _("Hire Date") }}</label>
+                                <label for="start_date" class="fw-medium text-body-secondary">{{ _("Hire Date") }}</label>
                                 <input type="date" class="form-control" id="start_date" name="start_date" 
                                        value="{{ employee.start_date.strftime('%Y-%m-%d') if employee and employee.start_date else '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="salary" class="form-label">{{ _("Salary") }}</label>
+                                <label for="salary" class="fw-medium text-body-secondary">{{ _("Salary") }}</label>
                                 <input type="number" class="form-control" id="salary" name="salary" 
                                        value="{{ employee.salary if employee else '' }}" step="0.01">
                             </div>
                             {% endif %}
                             <div class="mb-3">
-                                <label for="address" class="form-label">{{ _("Street Address") }}</label>
+                                <label for="address" class="fw-medium text-body-secondary">{{ _("Street Address") }}</label>
                                 <input type="text" class="form-control" id="address" name="address" 
                                        value="{{ employee.address if employee else '' }}">
                             </div>
                             <div class="row">
                                 <div class="col-md-5">
                                     <div class="mb-3">
-                                        <label for="city" class="form-label">{{ _("City") }}</label>
+                                        <label for="city" class="fw-medium text-body-secondary">{{ _("City") }}</label>
                                         <input type="text" class="form-control" id="city" name="city" 
                                                value="{{ employee.city if employee else '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="mb-4">
-                                        <label for="state" class="form-label">{{ _("State") }}</label>
+                                        <label for="state" class="fw-medium text-body-secondary">{{ _("State") }}</label>
                                         <input type="text" class="form-control" id="state" name="state" 
                                                value="{{ employee.state if employee else '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="zip_code" class="form-label">{{ _("ZIP Code") }}</label>
+                                        <label for="zip_code" class="fw-medium text-body-secondary">{{ _("ZIP Code") }}</label>
                                         <input type="text" class="form-control" id="zip_code" name="zip_code" 
                                                value="{{ employee.zip_code if employee else '' }}">
                                     </div>
@@ -158,12 +158,12 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="birthday" class="form-label">{{ _("Birthday") }}</label>
+                                <label for="birthday" class="fw-medium text-body-secondary">{{ _("Birthday") }}</label>
                                 <input type="date" class="form-control" id="birthday" name="birthday" 
                                        value="{{ employee.birthday.strftime('%Y-%m-%d') if employee and employee.birthday else '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="gender" class="form-label">{{ _("Gender") }}</label>
+                                <label for="gender" class="fw-medium text-body-secondary">{{ _("Gender") }}</label>
                                 <select class="form-select" id="gender" name="gender">
                                     <option value="">{{ _("Select Gender") }}</option>
                                     <option value="MALE" {% if employee and employee.gender and employee.gender.name == 'MALE' %}selected{% endif %}>{{ _("Male") }}</option>
@@ -175,17 +175,17 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="emergency_contact_name" class="form-label">{{ _("Emergency Contact Name") }}</label>
+                                <label for="emergency_contact_name" class="fw-medium text-body-secondary">{{ _("Emergency Contact Name") }}</label>
                                 <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" 
                                        value="{{ employee.emergency_contact_name if employee else '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="emergency_contact_phone" class="form-label">{{ _("Emergency Contact Phone") }}</label>
+                                <label for="emergency_contact_phone" class="fw-medium text-body-secondary">{{ _("Emergency Contact Phone") }}</label>
                                 <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" 
                                        value="{{ employee.emergency_contact_phone if employee else '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="emergency_contact_relationship" class="form-label">{{ _("Emergency Contact Relationship") }}</label>
+                                <label for="emergency_contact_relationship" class="fw-medium text-body-secondary">{{ _("Emergency Contact Relationship") }}</label>
                                 <input type="text" class="form-control" id="emergency_contact_relationship" name="emergency_contact_relationship" 
                                        value="{{ employee.emergency_contact_relationship if employee else '' }}">
                             </div>

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ employee.user.first_name }} {{ employee.user.last_name }} - {{ _("Team Member") }}{% endblock %}
 
@@ -42,27 +42,18 @@
         margin-bottom: 2rem;
     }
 
-    .tab-btn {
+    .nav-tabs .nav-link {
         border: none;
-        background: none;
-        padding: 0.75rem 1rem;
         color: #6c757d;
-        position: relative;
-        cursor: pointer;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        margin-bottom: -2px;
+        transition: color 0.2s, border-color 0.2s;
     }
 
-    .tab-btn.active {
-        color: var(--bs-primary);
-    }
-
-    .tab-btn.active::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--bs-primary);
+    .nav-tabs .nav-link.active {
+        color: var(--module-color);
+        border-bottom: 2px solid var(--module-color);
     }
 
     .info-section h3 {
@@ -74,6 +65,7 @@
 
     .info-section {
         margin-bottom: 2rem;
+        height: 100%;
     }
 
     .info-item {
@@ -90,6 +82,20 @@
     .info-item:last-child {
         margin-bottom: 0;
     }
+
+    @media (prefers-color-scheme: dark) {
+        .info-section {
+            background: #2d2d2d;
+        }
+
+        .info-section h3 {
+            color: #dee2e6;
+        }
+
+        .info-section label {
+            color: #adb5bd;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -97,7 +103,7 @@
 <div class="d-flex">
     {% include 'people_nav.html' with context %}
     <div class="content-wrapper flex-grow-1">
-        <div class="content-card">
+        <div class="bg-white p-4 rounded shadow-sm">
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
@@ -122,23 +128,27 @@
                 </div>
             </div>
 
-            <div class="contact-info d-flex gap-4">
-                <div class="contact-item">
-                    <i class="fas fa-phone text-muted"></i>
+            <div class="d-flex flex-wrap gap-4 mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-phone text-muted me-2 w-4 text-center"></i>
                     <span>{{ employee.phone or _('Not provided') }}</span>
                 </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope text-muted"></i>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-envelope text-muted me-2 w-4 text-center"></i>
                     <span>{{ employee.user.email }}</span>
                 </div>
             </div>
 
-            <div class="detail-tabs">
-                <button class="tab-btn active" data-tab="main">{{ _("Main") }}</button>
-            </div>
+            <ul class="nav nav-tabs border-0 mb-4" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#main-tab" type="button" role="tab">
+                        {{ _("Main Info") }}
+                    </button>
+                </li>
+            </ul>
 
-            <div class="detail-sections">
-                <div class="tab-content active" id="main-tab">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="main-tab" role="tabpanel">
                     <div class="row">
                         <div class="col-md-4">
                             <div class="info-section">

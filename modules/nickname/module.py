@@ -50,7 +50,7 @@ class NicknameModule:
 
             document.addEventListener('DOMContentLoaded', function() {
                 addField(`
-                    <label for="nickname" class="form-label">Nickname</label>
+                    <label for="nickname" class="fw-medium text-body-secondary">Nickname</label>
                     <input type="text" 
                            class="form-control" 
                            id="nickname" 

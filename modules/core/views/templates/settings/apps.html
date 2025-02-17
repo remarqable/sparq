@@ -1,124 +1,121 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}Manage Apps{% endblock %}
 
 {% block additional_styles %}
-<link rel="stylesheet" href="{{ url_for('core_bp.static', filename='css/app_manager.css') }}">
+<style>
+/* Only keep styles that can't be achieved with Bootstrap */
+.app-manager-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.app-manager-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-gray-100);
+    border-radius: 0.5rem;
+}
+
+.app-version-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.375rem;
+    background: var(--bs-gray-100);
+    border-radius: 0.25rem;
+}
+
+.alert.hiding {
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: all 0.3s ease-out;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ url_for('core_bp.settings') }}">
-                    <i class="fas fa-cog"></i> {{ _("Settings") }}
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                <i class="fas fa-puzzle-piece" style="color: var(--bs-primary)"></i> {{ _("App Manager") }}
-            </li>
-        </ol>
-    </nav>
+<div class="card shadow-sm mx-4 my-3">
+    <div class="card-body p-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('core_bp.settings') }}" class="text-decoration-none text-secondary">
+                        <i class="fas fa-cog me-2"></i> {{ _("Settings") }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-puzzle-piece me-2 text-primary"></i> {{ _("App Manager") }}
+                </li>
+            </ol>
+        </nav>
 
-    <div class="settings-header">
-        <h2><i class="fas fa-puzzle-piece" style="color: var(--bs-primary)"></i> {{ _("Manage Applications") }}</h2>
-        <p class="text-muted">{{ _("Enable, disable, or remove installed applications") }}</p>
-    </div>
+        <div class="mb-4">
+            <h2 class="d-flex align-items-center gap-3 mb-2">
+                <i class="fas fa-puzzle-piece text-primary"></i> 
+                {{ _("Manage Applications") }}
+            </h2>
+            <p class="text-muted mb-0">{{ _("Enable, disable, or remove installed applications") }}</p>
+        </div>
 
-    <div class="apps-grid">
-        {% for mod in modules %}
-            <div class="app-card">
-                <div class="app-card-content">
-                    <div class="app-manager-icon">
-                        <i class="{{ mod.icon_class }}" style="color: {{ mod.color }}"></i>
-                    </div>
-                    <div class="app-details">
-                        <div class="app-manager-header">
-                            <h3>{{ mod.name }} <span class="app-version">v{{ mod.version }}</span></h3>
-                            <p class="short-desc">{{ mod.description }}</p>
+        <div class="app-manager-grid">
+            {% for mod in modules %}
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="app-manager-icon flex-shrink-0">
+                                <i class="{{ mod.icon_class }}" style="color: {{ mod.color }}"></i>
+                            </div>
+                            <div class="flex-grow-1 min-width-0">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <h3 class="h5 mb-0">{{ mod.name }}</h3>
+                                    <span class="app-version-badge">v{{ mod.version }}</span>
+                                </div>
+                                <p class="text-secondary small mb-2">{{ mod.description }}</p>
+                                <p class="text-muted small mb-0">{{ mod.long_description }}</p>
+                            </div>
                         </div>
-                        <p class="long-desc">{{ mod.long_description }}</p>
+                        
+                        {% if mod.type != 'System' and mod.name != 'People' %}
+                            <div class="d-flex justify-content-end align-items-center gap-3 pt-3 border-top">
+                                <div class="form-check form-switch p-0 m-0">
+                                    <input class="form-check-input" type="checkbox" 
+                                           role="switch"
+                                           id="toggle-{{ mod.name|lower }}"
+                                           {% if mod.enabled %}checked{% endif %}
+                                           onchange="toggleModule('{{ mod.name }}', this.checked)">
+                                </div>
+                                <button class="btn btn-link text-danger p-0 border-0" onclick="confirmRemove('{{ mod.name }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-                
-                {% if mod.type != 'System' and mod.name != 'People' %}
-                    <div class="app-footer">
-                        <div class="footer-controls">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" 
-                                       role="switch"
-                                       id="toggle-{{ mod.name|lower }}"
-                                       {% if mod.enabled %}checked{% endif %}
-                                       onchange="toggleModule('{{ mod.name }}', this.checked)">
-                            </div>
-                            <button class="btn-icon" onclick="confirmRemove('{{ mod.name }}')">
-                                <i class="fas fa-trash-alt fa-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </div>
 
 <script>
 // Add toast container to the page
 document.body.insertAdjacentHTML('beforeend', `
-    <div id="toast-container" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-    "></div>
+    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 `);
 
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     
-    // Set toast styles based on type
-    toast.style.cssText = `
-        padding: 12px 24px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-        color: white;
-        opacity: 0;
-        transition: opacity 0.3s ease-in;
-        max-width: 300px;
-    `;
-    
-    // Set background color based on type
-    switch(type) {
-        case 'error':
-            toast.style.backgroundColor = '#dc3545';
-            break;
-        case 'warning':
-            toast.style.backgroundColor = '#ffc107';
-            toast.style.color = '#000';
-            break;
-        case 'success':
-            toast.style.backgroundColor = '#28a745';
-            break;
-        default:
-            toast.style.backgroundColor = '#0d6efd';  // Bootstrap primary blue
-    }
-    
+    toast.className = `alert alert-${type} fade show shadow-sm`;
     toast.textContent = message;
     container.appendChild(toast);
     
-    // Trigger fade in
     setTimeout(() => {
-        toast.style.opacity = '1';
-    }, 10);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            container.removeChild(toast);
-        }, 300);
+        toast.classList.add('hiding');
+        setTimeout(() => container.removeChild(toast), 300);
     }, 3000);
 }
 
@@ -141,8 +138,6 @@ async function toggleModule(moduleName, enabled) {
         
         const data = await response.json();
         showToast(data.message);
-
-        // Wait for server to restart and reload
         await reloadAfterRestart();
         
     } catch (error) {
@@ -168,7 +163,6 @@ async function restartApplication() {
             return;
         }
 
-        // Wait for server to restart and reload
         await reloadAfterRestart();
         
     } catch (error) {
@@ -179,22 +173,12 @@ async function restartApplication() {
 
 async function reloadAfterRestart() {
     showToast('{{ _("Waiting for server to restart...") }}');
-    
-    // First wait for server to go down
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Then wait for it to come back up
     try {
         await waitForServer();
         showToast('{{ _("Server restarted, reloading page...") }}');
-        
-        // Force a hard reload of the page
-        window.location.href = window.location.href;
-        
-        // If that doesn't work, try a force reload
-        setTimeout(() => {
-            window.location.reload(true);
-        }, 500);
+        window.location.reload(true);
     } catch (error) {
         showToast('{{ _("Server failed to restart") }}', 'error');
     }
@@ -204,10 +188,8 @@ async function waitForServer(retries = 20) {
     for (let i = 0; i < retries; i++) {
         try {
             await new Promise(resolve => setTimeout(resolve, 500));
-            // Check login page instead of restart endpoint
             const response = await fetch('/login', { method: 'GET' });
             if (response.ok) {
-                // Wait a bit more to ensure server is fully ready
                 await new Promise(resolve => setTimeout(resolve, 500));
                 return true;
             }

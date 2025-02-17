@@ -3,113 +3,78 @@
     --module-color: #0d6efd;
 }
 
-/* Side Navigation */
+/* Base Layout Structure */
+.app-layout {
+    display: flex;
+    gap: 2rem;
+    padding: 1.5rem;
+    height: calc(100vh - 4rem);
+}
+
 .side-nav {
-    width: 240px;
-    min-width: 250px;
-    flex: 0 0 240px;
+    width: 280px;
+    min-width: 280px;
     background: white;
     border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding-top: 1.5rem;
+}
+
+.app-content {
+    flex: 1;
+    min-width: 0;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    max-width: 1024px;
     height: 100%;
     overflow-y: auto;
 }
 
-.nav-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.nav-item {
-    margin-bottom: 0.5rem;
-}
-
-.nav-item:last-child {
-    margin-bottom: 0;
-}
-
-.nav-link {
+/* Navigation Styles */
+.side-nav .nav-item a {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
     color: #495057;
     text-decoration: none;
-    border-radius: 0.25rem;
     transition: all 0.2s ease;
-    white-space: nowrap;
+    font-size: 0.9375rem;  /* 15px */
 }
 
-.nav-link:hover {
-    background-color: #f8f9fa;
+.side-nav .nav-item a:hover {
+    background: #f8f9fa;
     color: var(--module-color);
-    transform: translateX(5px);
 }
 
-.nav-link.active {
-    background: rgba(13, 110, 253, 0.1);
+.side-nav .nav-item a.active {
+    background: #f8f9fa;
     color: var(--module-color);
-    font-weight: 500;
 }
 
-.nav-link i {
-    font-size: 1.1rem;
+.side-nav .nav-item i {
     width: 1.5rem;
     text-align: center;
 }
 
 /* Specific icon colors */
 .nav-link i.fa-users { color: var(--module-color) !important; }
-.nav-link i.fa-user-plus { color: #198754 !important; }
-.nav-link i.fa-handshake { color: #6610f2 !important; }
-.nav-link i.fa-clock { color: #dc3545 !important; }
-.nav-link i.fa-calendar-alt { color: #0dcaf0 !important; }
-.nav-link i.fa-file-alt { color: #20c997 !important; }
-.nav-link i.fa-receipt { color: #20c997 !important; }
-.nav-link i.fa-folder { color: #6c757d !important; }
-.nav-link i.fa-book { color: #d63384 !important; }
-.nav-link i.fa-cog { color: #6c757d !important; }
-.nav-link i.fa-bullhorn { color: #fd7e14 !important; }
+.nav-link i.fa-user-plus { color: var(--bs-success) !important; }
+.nav-link i.fa-handshake { color: var(--bs-purple) !important; }
+.nav-link i.fa-clock { color: var(--bs-danger) !important; }
+.nav-link i.fa-calendar-alt { color: var(--bs-info) !important; }
+.nav-link i.fa-file-alt { color: var(--bs-teal) !important; }
+.nav-link i.fa-receipt { color: var(--bs-teal) !important; }
+.nav-link i.fa-folder { color: var(--bs-gray-600) !important; }
+.nav-link i.fa-book { color: var(--bs-pink) !important; }
+.nav-link i.fa-cog { color: var(--bs-gray-600) !important; }
+.nav-link i.fa-bullhorn { color: var(--bs-orange) !important; }
 
-/* Keep icon colors on hover/active */
-.nav-link:hover i,
-.nav-link.active i {
-    opacity: 0.9;
-}
-
-/* Basic layout for content area */
-.content-wrapper {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-}
-
-/* Basic content card style that can be extended in specific section CSS files */
-.content-card {
-    background: white;
-    padding: 1.25rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    flex: 1;
-}
-
-/* Layout */
-.people-layout {
-    display: flex;
-    gap: 1rem;
-    min-width: 1000px;
-    max-width: 100%;
-    height: 100%;
-    flex: 1;
-}
-
-.main-content {
-    flex: 1 1 auto;
-    min-width: 0;
-    display: flex;
-    height: 100%;
-    overflow: hidden;
+/* Table Styles - Custom styles not available in Bootstrap */
+.table-responsive {
+    border-radius: var(--bs-border-radius);
 }
 
 /* Employee List Styles */
@@ -117,30 +82,9 @@
     margin: 0 auto;
 }
 
-.user-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-.action-buttons {
-    width: 1%;  /* Makes the column as narrow as possible */
-    white-space: nowrap;
-}
-
-.status-active {
-    color: #198754;  /* Bootstrap success color */
-    font-size: 0.5rem;  /* Make the dot smaller */
-}
-
-.status-inactive {
-    color: #6c757d;  /* Bootstrap secondary color */
-    font-size: 0.5rem;  /* Make the dot smaller */
+/* Custom icon width that Bootstrap doesn't provide */
+.w-4 {
+    width: 1.25rem;
 }
 
 .admin-badge {
@@ -148,7 +92,7 @@
     color: #000;
     padding: 2px 8px;
     border-radius: 0.25rem;
-    font-size: 0.8em;
+    
 }
 
 /* Coming Soon Page */
@@ -174,157 +118,6 @@
     line-height: 1.5;
 }
 
-/* Dashboard Styles */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-}
-
-.stat-card {
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: white;
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.375rem;
-    background: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: var(--module-color);
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #343a40;
-    line-height: 1;
-    margin-bottom: 0.25rem;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: #6c757d;
-}
-
-.charts-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-}
-
-.chart-card {
-    height: 300px;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-}
-
-.chart-card h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
-    color: #343a40;
-}
-
-.chart-placeholder {
-    height: calc(100% - 2rem);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #f8f9fa;
-    border-radius: 0.25rem;
-    color: #6c757d;
-}
-
-.chart-placeholder i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-.activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.activity-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border-radius: 0.25rem;
-}
-
-.activity-item i {
-    font-size: 1rem;
-}
-
-.activity-item span {
-    flex: 1;
-}
-
-.activity-item small {
-    color: #6c757d;
-}
-
-/* Update table styles for better fit in card */
-.table-responsive {
-    margin-top: 1rem;
-}
-
-.table {
-    margin-bottom: 0;
-}
-
-/* Coming Soon Page */
-.coming-soon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    padding: 2rem;
-    text-align: center;
-}
-
-.coming-soon i {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-}
-
-.coming-soon h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #212529;
-}
-
-.coming-soon p {
-    color: #6c757d;
-    font-size: 1.1rem;
-    max-width: 500px;
-}
-
-:root {
-    --people-color: #0d6efd;
-}
-
 /* Modal Styles */
 .modal.fade.show {
     background: rgba(0, 0, 0, 0.5);
@@ -344,12 +137,7 @@
     border-top: 1px solid #dee2e6;
 }
 
-/* Form Styles */
-.form-label {
-    font-weight: 500;
-    color: #495057;
-}
-
+/* Form Styles - Only keep focus styles */
 .form-control:focus {
     border-color: var(--module-color);
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
@@ -360,109 +148,39 @@
     border-color: var(--module-color);
 }
 
-/* Status Indicators */
-.status-active {
-    color: #198754;  /* Bootstrap success color */
-    font-size: 0.5rem;  /* Make the dot smaller */
-}
-
-.status-inactive {
-    color: #6c757d;  /* Bootstrap secondary color */
-    font-size: 0.5rem;  /* Make the dot smaller */
-}
-
-.admin-badge {
-    background-color: #ffc107;
-    color: #000;
-    padding: 2px 8px;
-    border-radius: 0.25rem;
-    font-size: 0.8em;
-}
-
-.employee-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.employee-row:hover {
-    background-color: rgba(0,0,0,0.02);
-}
-
-.user-initials {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #e9ecef !important;  /* Changed from var(--bs-primary) */
-    color: #495057 !important;  /* Changed from white */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-}
-
-/* Status Indicators */
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    display: inline-block;
-}
-
-.status-dot.active {
-    background-color: #198754;  /* Bootstrap success color */
-}
-
-.status-dot.inactive {
-    background-color: #6c757d;  /* Bootstrap secondary color */
-}
-
-/* Status text colors */
-.status-dot.active + span {
-    color: #198754;  /* Match dot color */
-    font-weight: 500;
-}
-
-.status-dot.inactive + span {
-    color: #6c757d;  /* Match dot color */
-}
-
-/* Add these styles */
-.action-buttons .btn-outline-secondary {
-    border-color: #dee2e6;
-    color: #adb5bd;
-    opacity: 0.6;
-    transition: all 0.2s;
-}
-
-.action-buttons .btn-outline-secondary:hover {
-    border-color: #dc3545;
-    color: #dc3545;
-    background-color: transparent;
-    opacity: 1;
-}
-
-/* Employee avatar styling - matching updates style */
-.employee-avatar {
-    width: 40px;
-    height: 40px;
-    background: #e9ecef;  /* Same gray as updates */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    color: #495057;  /* Dark gray text */
-}
-
-/* Remove any existing blue styling */
-.avatar-circle {
-    background: #e9ecef !important;  /* Override any existing color */
-    color: #495057 !important;
-}
-
 /* Ensure dropdowns in header are not affected by module layout */
 .people-app .app-header .dropdown-menu {
     position: absolute !important;
     z-index: 1050 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .nav-column {
+        width: 250px;
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 992px) {
+    .d-flex.h-100 {
+        flex-direction: column;
+    }
+    
+    .nav-column {
+        width: 100%;
+        min-width: 0;
+        margin-right: 0;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+    }
+    
+    .content-column {
+        margin-left: 0;
+        padding: 0.5rem;
+    }
+    
+    .content-wrapper {
+        height: calc(100vh - 8rem);
+    }
 } 

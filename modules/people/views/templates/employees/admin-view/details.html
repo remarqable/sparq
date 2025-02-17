@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ employee.user.first_name }} {{ employee.user.last_name }} - {{ _("Employee Details") }}{% endblock %}
 
@@ -7,188 +7,28 @@
 {% block additional_styles %}
 <link rel="stylesheet" href="{{ url_for('people_bp.static', filename='css/people.css') }}">
 <style>
-    /* Employee Actions */
-    .employee-actions .btn.action-btn {
-        border: none !important;
-        background: none !important;
-        color: #adb5bd !important;
-        padding: 0.375rem 0.5rem;
-        transition: color 0.2s;
-        box-shadow: none !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        min-width: 30px !important;
-        min-height: 30px !important;
-    }
-    
-    .employee-actions .btn.action-btn.edit-btn:hover {
-        color: var(--bs-primary) !important;
-    }
-    
-    .employee-actions .btn.action-btn.delete-btn:hover {
-        color: var(--bs-danger) !important;
-    }
-    
-    .employee-actions .btn.action-btn i {
-        margin-right: 0;
-        font-size: 1rem;
-    }
-
-    .employee-actions .btn {
-        color: #adb5bd;
-        padding: 0.375rem;
-    }
-
-    .employee-actions .btn:hover {
-        color: var(--bs-primary);
-    }
-
-    .employee-actions .btn.delete-btn:hover {
-        color: var(--bs-danger);
-    }
-
-    .employee-actions .btn.me-2 {
-        margin-right: 0.25rem !important;
-    }
-
-    /* Employee Details */
-    .employee-details h1 {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .position-title {
-        color: #6c757d;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-    }
-
-    .contact-info {
-        display: flex;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .contact-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .detail-tabs {
-        display: flex;
-        gap: 1rem;
-        border-bottom: 1px solid #dee2e6;
-        padding-bottom: 1rem;
-    }
-
-    .tab-btn {
+    /* Tabs */
+    .nav-tabs .nav-link {
         border: none;
-        background: none;
-        padding: 0.5rem 1rem;
         color: #6c757d;
         font-weight: 500;
+        padding: 0.5rem 1rem;
+        margin-bottom: -2px;
+        transition: color 0.2s, border-color 0.2s;
     }
 
-    .tab-btn.active {
+    .nav-tabs .nav-link.active {
         color: var(--module-color);
         border-bottom: 2px solid var(--module-color);
     }
 
+    /* Info Sections */
     .info-section {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         height: 100%;
     }
 
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .info-section h3 {
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-        color: #444;
-    }
-
-    .info-item {
-        margin-bottom: 1rem;
-    }
-
-    .info-item label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .editable-field {
-        position: relative;
-        display: inline-block;
-    }
-
-    .edit-btn {
-        opacity: 0;
-        position: absolute;
-        right: -40px;
-        top: 50%;
-        transform: translateY(-70%);
-        border: none;
-        background: none;
-        color: var(--bs-primary);
-        transition: all 0.2s;
-        cursor: pointer;
-        padding: 5px 10px;
-        margin-left: 10px;
-        line-height: 1;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .editable-field:hover .edit-btn {
-        opacity: 1;
-        right: -45px;
-    }
-
-    .field-value {
-        display: inline-block;
-        margin-right: 10px;
-    }
-
-    .btn-outline-secondary {
-        border-color: #dee2e6;
-        color: #adb5bd;
-        opacity: 0.6;
-        transition: all 0.2s;
-    }
-
-    .btn-outline-secondary:hover {
-        border-color: #dc3545;
-        color: #dc3545;
-        background-color: transparent;
-        opacity: 1;
-    }
-
-    .content-card {
-        position: relative;
-        padding: 1.5rem;
-    }
-
-    .employee-details {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .action-buttons {
-        position: relative;
-        right: 0;
-        top: 0;
-        margin-left: 1rem;
-        white-space: nowrap;
+    .info-section label {
+        font-size: 0.875rem;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -200,7 +40,7 @@
             color: #dee2e6;
         }
 
-        .info-item label {
+        .info-section label {
             color: #adb5bd;
         }
     }
@@ -208,15 +48,15 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex">
+<div class="d-flex h-100">
     {% include 'people_nav.html' with context %}
-    <div class="content-wrapper flex-grow-1">
-        <div class="content-card">
+    <div class="content-wrapper">
+        <div class="bg-white p-4 rounded shadow-sm">
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item">
-                            <a href="{{ url_for('people_bp.employees') }}">{{ _("Employees") }}</a>
+                            <a href="{{ url_for('people_bp.employees') }}" class="text-decoration-none">{{ _("Employees") }}</a>
                         </li>
                         <li class="breadcrumb-item active">
                             {{ employee.user.first_name }} {{ employee.user.last_name }}
@@ -225,149 +65,160 @@
                 </nav>
             </div>
 
-            <div class="d-flex justify-content-between align-items-start employee-header">
-                <div>
-                    <h1 class="employee-name">
-                        {{ employee.user.first_name }} {{ employee.user.last_name }}
-                    </h1>
-                    <p class="employee-position">
-                        {{ employee.position or _("Owner") }}
-                    </p>
-                </div>
-                <div class="employee-actions">
-                    <a href="{{ url_for('people_bp.edit_employee', employee_id=employee.id) }}" 
-                       class="btn me-2" title="{{ _('Edit') }}">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    {% if current_user.is_admin and current_user.employee_profile.id != employee.id %}
-                    <button class="btn delete-btn"
-                            data-bs-toggle="modal" 
-                            data-bs-target="#deleteEmployeeModal"
-                            title="{{ _('Delete') }}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    {% endif %}
+            <div class="border-bottom pb-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h2 fw-semibold mb-1 text-body">
+                            {{ employee.user.first_name }} {{ employee.user.last_name }}
+                        </h1>
+                        <p class="text-muted fs-5 mb-0">
+                            {{ employee.position or _("Owner") }}
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('people_bp.edit_employee', employee_id=employee.id) }}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>{{ _("Edit") }}
+                        </a>
+                        {% if current_user.is_admin and current_user.employee_profile.id != employee.id %}
+                        <button class="btn btn-outline-danger"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteEmployeeModal">
+                            <i class="fas fa-trash me-2"></i>{{ _("Delete") }}
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
-            <div class="contact-info">
-                <div class="contact-item">
-                    <i class="fas fa-phone text-muted"></i>
+            <div class="d-flex flex-wrap gap-4 mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-phone text-muted me-2 w-4 text-center"></i>
                     <span>{{ employee.phone or _('Not provided') }}</span>
                 </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope text-muted"></i>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-envelope text-muted me-2 w-4 text-center"></i>
                     <span>{{ employee.user.email }}</span>
                 </div>
             </div>
 
-            <div class="detail-tabs">
-                <button class="tab-btn active" data-tab="main">{{ _("Main Info") }}</button>
-                <button class="tab-btn" data-tab="personal">{{ _("Personal Info") }}</button>
-            </div>
+            <ul class="nav nav-tabs border-0 mb-4" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#main-tab" type="button" role="tab">
+                        {{ _("Main Info") }}
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#personal-tab" type="button" role="tab">
+                        {{ _("Personal Info") }}
+                    </button>
+                </li>
+            </ul>
 
-            <div class="tab-content active" id="main-tab">
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="info-section">
-                            <h3>{{ _("Employment") }}</h3>
-                            <div class="info-item">
-                                <label>{{ _("Department") }}</label>
-                                <div>{{ employee.department or _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Position") }}</label>
-                                <div>{{ employee.position or _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Manager") }}</label>
-                                <div>{{ employee.manager.user.full_name if employee.manager else _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Type") }}</label>
-                                <div>{{ employee.type.value if employee.type else _('Not set') }}</div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="main-tab" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="info-section bg-white p-4 rounded shadow-sm">
+                                <h3 class="h5 mb-4">{{ _("Employment") }}</h3>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Department") }}</label>
+                                    <div>{{ employee.department or _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Position") }}</label>
+                                    <div>{{ employee.position or _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Manager") }}</label>
+                                    <div>{{ employee.manager.user.full_name if employee.manager else _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Type") }}</label>
+                                    <div>{{ employee.type.value if employee.type else _('Not set') }}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-4">
-                        <div class="info-section">
-                            <h3>{{ _("Contact") }}</h3>
-                            <div class="info-item">
-                                <label>{{ _("Email") }}</label>
-                                <div>{{ employee.user.email }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Phone") }}</label>
-                                <div>{{ employee.phone or _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Address") }}</label>
-                                <div>{{ employee.address or _('Not set') }}</div>
+                        <div class="col-md-4">
+                            <div class="info-section bg-white p-4 rounded shadow-sm">
+                                <h3 class="h5 mb-4">{{ _("Contact") }}</h3>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Email") }}</label>
+                                    <div>{{ employee.user.email }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Phone") }}</label>
+                                    <div>{{ employee.phone or _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Address") }}</label>
+                                    <div>{{ employee.address or _('Not set') }}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-4">
-                        <div class="info-section">
-                            <h3>{{ _("Employment Details") }}</h3>
-                            <div class="info-item">
-                                <label>{{ _("Hire Date") }}</label>
-                                <div>{{ employee.hire_date.strftime('%B %d, %Y') if employee.hire_date else _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Status") }}</label>
-                                <div>{{ employee.status.value if employee.status else _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Employee ID") }}</label>
-                                <div>{{ employee.id }}</div>
+                        <div class="col-md-4">
+                            <div class="info-section bg-white p-4 rounded shadow-sm">
+                                <h3 class="h5 mb-4">{{ _("Employment Details") }}</h3>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Hire Date") }}</label>
+                                    <div>{{ employee.hire_date.strftime('%B %d, %Y') if employee.hire_date else _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Status") }}</label>
+                                    <div>{{ employee.status.value if employee.status else _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Employee ID") }}</label>
+                                    <div>{{ employee.id }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="tab-content" id="personal-tab" style="display: none;">
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="info-section">
-                            <h3>{{ _("Personal Info") }}</h3>
-                            <div class="info-item">
-                                <label>{{ _("Birthday") }}</label>
-                                <div>{{ employee.birthday.strftime('%B %d, %Y') if employee.birthday else _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Gender") }}</label>
-                                <div>{{ employee.gender or _('Not set') }}</div>
+                <div class="tab-pane fade" id="personal-tab" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="info-section bg-white p-4 rounded shadow-sm">
+                                <h3 class="h5 mb-4">{{ _("Personal Info") }}</h3>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Birthday") }}</label>
+                                    <div>{{ employee.birthday.strftime('%B %d, %Y') if employee.birthday else _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Gender") }}</label>
+                                    <div>{{ employee.gender or _('Not set') }}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-4">
-                        <div class="info-section">
-                            <h3>{{ _("Emergency Contact") }}</h3>
-                            <div class="info-item">
-                                <label>{{ _("Name") }}</label>
-                                <div>{{ employee.emergency_contact_name or _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Phone") }}</label>
-                                <div>{{ employee.emergency_contact_phone or _('Not set') }}</div>
-                            </div>
-                            <div class="info-item">
-                                <label>{{ _("Relationship") }}</label>
-                                <div>{{ employee.emergency_contact_relationship or _('Not set') }}</div>
+                        <div class="col-md-4">
+                            <div class="info-section bg-white p-4 rounded shadow-sm">
+                                <h3 class="h5 mb-4">{{ _("Emergency Contact") }}</h3>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Name") }}</label>
+                                    <div>{{ employee.emergency_contact_name or _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Phone") }}</label>
+                                    <div>{{ employee.emergency_contact_phone or _('Not set') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Relationship") }}</label>
+                                    <div>{{ employee.emergency_contact_relationship or _('Not set') }}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-4">
-                        <div class="info-section">
-                            <h3>{{ _("Social") }}</h3>
-                            <div class="info-item">
-                                <label>{{ _("Social Media") }}</label>
-                                <div>{{ employee.social_media or _('Not set') }}</div>
+                        <div class="col-md-4">
+                            <div class="info-section bg-white p-4 rounded shadow-sm">
+                                <h3 class="h5 mb-4">{{ _("Social") }}</h3>
+                                <div class="mb-3">
+                                    <label class="text-muted small d-block mb-1">{{ _("Social Media") }}</label>
+                                    <div>{{ employee.social_media or _('Not set') }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -397,31 +248,4 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active class from all buttons and contents
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => {
-                content.style.display = 'none';
-                content.classList.remove('active');
-            });
-
-            // Add active class to clicked button
-            button.classList.add('active');
-
-            // Show corresponding content
-            const tabId = button.getAttribute('data-tab');
-            const activeContent = document.getElementById(`${tabId}-tab`);
-            activeContent.style.display = 'block';
-            activeContent.classList.add('active');
-        });
-    });
-});
-</script>
 {% endblock %} 

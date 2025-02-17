@@ -13,6 +13,8 @@ window.chatApp = () => ({
     filteredMessages: '',
     messageContent: '',
     channelStates: {},
+    messages: [],
+    isLoadingMore: false,
 
     initializeApp() {
         // Initialize channel states from meta tag data
@@ -99,47 +101,37 @@ window.chatApp = () => ({
         });
     },
 
-    async loadChannelMessages(channelName, beforeId = null) {
+    async loadChannelMessages() {
         try {
-            let url = this.getApiUrl('get_messages', { channel: channelName });
-            const params = new URLSearchParams();
-            
-            if (beforeId) {
-                params.append('before_id', beforeId);
-            }
-            if (this.showPinnedOnly) {
-                params.append('pinned_only', 'true');
-            }
-            if (this.searchQuery) {
-                params.append('search', encodeURIComponent(this.searchQuery.trim()));
-            }
-            
-            if (params.toString()) {
-                url += '?' + params.toString();
-            }
-            
+            const url = this.getApiUrl('get_messages', { channel: this.currentChannel });
             const response = await fetch(url);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Failed to load messages');
-            }
+            if (!response.ok) throw new Error('Failed to load messages');
             
-            // For mobile view, we need to update the messages container directly
-            const chatMessages = this.$refs.chatMessages;
-            if (chatMessages) {
-                const html = await response.text();
-                chatMessages.innerHTML = html;
-                
-                // Dispatch event to trigger scroll
-                window.dispatchEvent(new CustomEvent('chat-updated'));
-            }
+            const html = await response.text();
+            
+            // Update the messages container with the new HTML
+            const container = this.$refs.chatMessages;
+            container.innerHTML = html;
+            
+            // Scroll to bottom after loading initial messages
+            this.$nextTick(() => {
+                this.scrollToBottom();
+            });
+            
         } catch (error) {
             console.error('Error loading messages:', error);
-            if (this.$refs.chatMessages) {
-                this.$refs.chatMessages.innerHTML = `<div class="text-center p-4 text-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    Error loading messages. Please try again.
-                </div>`;
+        }
+    },
+
+    handleScroll() {
+        const container = this.$refs.chatMessages;
+        if (!container) return;
+
+        // Check if we should load more messages (when scrolling up)
+        if (container.scrollTop === 0 && !this.isLoadingMore) {
+            const oldestMessage = this.messages[0];
+            if (oldestMessage) {
+                this.loadMoreMessages(oldestMessage.id);
             }
         }
     },
@@ -204,7 +196,7 @@ window.chatApp = () => ({
     async switchChannel(channelName, channelId) {
         this.currentChannel = channelName;
         this.currentChannelDescription = this.channelStates[channelId].description;
-        await this.loadChannelMessages(channelName);
+        await this.loadChannelMessages(this.currentChannel);
         await this.markChannelRead(channelId, channelName);
     },
 
@@ -422,7 +414,10 @@ window.chatApp = () => ({
     },
 
     async loadMoreMessages(beforeId) {
+        if (this.isLoadingMore) return;
+        
         try {
+            this.isLoadingMore = true;
             let url = this.getApiUrl('get_messages', { channel: this.currentChannel });
             if (beforeId) {
                 url += `?before_id=${beforeId}`;
@@ -430,27 +425,27 @@ window.chatApp = () => ({
             
             const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to load messages');
+            
             const html = await response.text();
             
-            // Create a temporary container
+            // Create a temporary container to parse the HTML
             const temp = document.createElement('div');
             temp.innerHTML = html;
             
-            // Get the chat messages container
-            const chatMessages = this.$refs.chatMessages;
-            const loadMoreBtn = chatMessages.querySelector('.load-more-messages');
+            // Preserve scroll position
+            const container = this.$refs.chatMessages;
+            const oldScrollHeight = container.scrollHeight;
             
-            // Remove the old "Load More" button if it exists
-            if (loadMoreBtn) {
-                loadMoreBtn.remove();
-            }
+            // Insert the new messages at the beginning
+            container.insertAdjacentHTML('afterbegin', html);
             
-            // Insert the new messages at the top
-            Array.from(temp.children).forEach(child => {
-                chatMessages.insertBefore(child, chatMessages.firstChild);
-            });
+            // Adjust scroll position to maintain the user's place
+            container.scrollTop = container.scrollHeight - oldScrollHeight;
+            
         } catch (error) {
             console.error('Error loading more messages:', error);
+        } finally {
+            this.isLoadingMore = false;
         }
     }
 });

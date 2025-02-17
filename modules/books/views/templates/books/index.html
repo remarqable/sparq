@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-desktop.html" %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -12,10 +12,10 @@
                         <div class="container mt-0">
                             <ul class="nav nav-tabs" id="myTab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</button>
+                                    <button class=" active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="categorize-tab" data-bs-toggle="tab" data-bs-target="#categorize" type="button" role="tab" aria-controls="categorize" aria-selected="false">Categorize</button>
+                                    <button class="" id="categorize-tab" data-bs-toggle="tab" data-bs-target="#categorize" type="button" role="tab" aria-controls="categorize" aria-selected="false">Categorize</button>
                                 </li>
                             </ul>
                             <div class="tab-content" id="myTabContent">
@@ -72,7 +72,7 @@
                                                     <!-- Add Month/Year Filter -->
                                                     <div class="row mb-4">
                                                         <div class="col-md-3">
-                                                            <label for="monthSelect" class="form-label">Month</label>
+                                                            <label for="monthSelect" class="fw-medium text-body-secondary">Month</label>
                                                             <select class="form-select" id="monthSelect">
                                                                 <option value="1">January</option>
                                                                 <option value="2">February</option>
@@ -89,7 +89,7 @@
                                                             </select>
                                                         </div>
                                                         <div class="col-md-3">
-                                                            <label for="yearSelect" class="form-label">Year</label>
+                                                            <label for="yearSelect" class="fw-medium text-body-secondary">Year</label>
                                                             <select class="form-select" id="yearSelect">
                                                                 <option value="2024">2024</option>
                                                                 <option value="2023">2023</option>
@@ -205,17 +205,17 @@
                 <div class="modal-body">
                     <ul class="nav nav-tabs" id="importTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv" type="button" role="tab" aria-controls="csv" aria-selected="true">CSV Import</button>
+                            <button class=" active" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv" type="button" role="tab" aria-controls="csv" aria-selected="true">CSV Import</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank" type="button" role="tab" aria-controls="bank" aria-selected="false">Connect Bank</button>
+                            <button class="" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank" type="button" role="tab" aria-controls="bank" aria-selected="false">Connect Bank</button>
                         </li>
                     </ul>
                     <div class="tab-content" id="importTabContent">
                         <div class="tab-pane fade show active" id="csv" role="tabpanel" aria-labelledby="csv-tab">
                             <form class="mt-3">
                                 <div class="mb-3">
-                                    <label for="csvFile" class="form-label">Choose CSV file</label>
+                                    <label for="csvFile" class="fw-medium text-body-secondary">Choose CSV file</label>
                                     <input class="form-control" type="file" id="csvFile" accept=".csv">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Import CSV</button>
@@ -224,15 +224,15 @@
                         <div class="tab-pane fade" id="bank" role="tabpanel" aria-labelledby="bank-tab">
                             <form class="mt-3">
                                 <div class="mb-3">
-                                    <label for="bankName" class="form-label">Bank Name</label>
+                                    <label for="bankName" class="fw-medium text-body-secondary">Bank Name</label>
                                     <input type="text" class="form-control" id="bankName" placeholder="Enter your bank's name">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="bankUsername" class="form-label">Username</label>
+                                    <label for="bankUsername" class="fw-medium text-body-secondary">Username</label>
                                     <input type="text" class="form-control" id="bankUsername" placeholder="Enter your bank username">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="bankPassword" class="form-label">Password</label>
+                                    <label for="bankPassword" class="fw-medium text-body-secondary">Password</label>
                                     <input type="password" class="form-control" id="bankPassword" placeholder="Enter your bank password">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Connect Bank</button>
